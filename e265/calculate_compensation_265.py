@@ -145,28 +145,23 @@ def main():
     healthy_map = {x["member_address"]: x for x in vw_healthy}
     end_map     = {x["member_address"]: x for x in vw_end}
 
-    # Implied rate: total actual rewards paid / total CW at epoch end
-    # Accounts for delegation effects and reflects exactly what the chain paid
-    # per unit of confirmed work this epoch
-    total_cw_end = sum(int(x.get("confirmation_weight", 0)) for x in vw_end if "confirmation_weight" in x)
-    total_actual = sum(performance.values())
-    implied_rate = total_actual / total_cw_end if total_cw_end else 0
+    # Total weight is stable throughout the epoch — verified constant from
+    # block 4095000 through epoch end. Use epoch-end as canonical.
+    total_weight = sum(int(x.get("weight", 0)) for x in vw_end)
 
-    print(f"Epoch {EPOCH} theoretical reward pool      : {epoch_theoretical_reward / 1e9:,.4f} GONKA")
-    print(f"Total actual rewards paid                  : {total_actual / 1e9:,.4f} GONKA")
-    print(f"Total confirmation_weight at epoch end     : {total_cw_end:,}")
-    print(f"Implied rate (actual/cw_end)               : {implied_rate:.4f} ngonka/cw-unit")
+    print(f"Epoch {EPOCH} theoretical reward pool : {epoch_theoretical_reward / 1e9:,.4f} GONKA")
+    print(f"Total epoch weight                    : {total_weight:,}")
     print()
 
     excluded = []
     results  = []
 
     for addr in kimi_addrs:
-        x = healthy_map.get(addr)
-        if not x or "confirmation_weight" not in x:
+        x_h = healthy_map.get(addr)
+        if not x_h or "confirmation_weight" not in x_h:
             excluded.append((addr, "no confirmation_weight at healthy height"))
             continue
-        cw_healthy = int(x["confirmation_weight"])
+        cw_healthy = int(x_h["confirmation_weight"])
         if cw_healthy == 0:
             excluded.append((addr, "confirmation_weight = 0"))
             continue
@@ -179,13 +174,18 @@ def main():
             excluded.append((addr, f"CW drop {drop:.1%} below threshold — not attributable to bug"))
             continue
 
+        # Fair reward = participant's weight / total epoch weight * epoch reward
+        # Weight is unaffected by the CPoC bug — it's set at epoch start.
+        # The bug reduced confirmation_weight which caused the chain to underpay.
+        weight       = int(x_end.get("weight", 0))
         actual       = performance.get(addr, 0)
-        correct      = cw_healthy * implied_rate
+        correct      = weight / total_weight * epoch_theoretical_reward
         compensation = max(0.0, correct - actual)
 
         if compensation > 0:
             results.append({
                 "address":               addr,
+                "weight":                weight,
                 "cw_healthy":            cw_healthy,
                 "cw_end":                cw_end,
                 "cw_drop_pct":           round(drop * 100, 2),
@@ -209,10 +209,11 @@ def main():
     print(f"{'='*112}")
     print(f"COMPENSATION SUMMARY — Epoch {EPOCH} (CPoC degradation)")
     print(f"{'='*112}")
-    print(f"{'Address':<50} {'cw@healthy':>10} {'cw@end':>8} {'drop':>6} {'correct':>14} {'actual':>14} {'owed':>14}")
-    print(f"{'-'*120}")
+    print(f"{'Address':<50} {'weight':>8} {'cw@healthy':>10} {'cw@end':>8} {'drop':>6} {'correct':>14} {'actual':>14} {'owed':>14}")
+    print(f"{'-'*124}")
     for r in results:
         print(f"{r['address']:<50} "
+              f"{r['weight']:>8,} "
               f"{r['cw_healthy']:>10,} "
               f"{r['cw_end']:>8,} "
               f"{r['cw_drop_pct']:>5.1f}% "
@@ -245,10 +246,7 @@ def main():
             "cpoc_cutoff_height":              CPOC_CUTOFF,
             "epoch_theoretical_reward_ngonka": int(epoch_theoretical_reward),
             "epoch_theoretical_reward_gonka":  epoch_theoretical_reward / 1e9,
-            "total_actual_rewards_ngonka":     total_actual,
-            "total_actual_rewards_gonka":      total_actual / 1e9,
-            "total_cw_epoch_end":              total_cw_end,
-            "implied_rate_ngonka_per_cw":      implied_rate,
+            "total_epoch_weight":              total_weight,
             "affected_participants":           len(results),
             "total_compensation_ngonka":       total_comp,
             "total_compensation_gonka":        total_comp / 1e9,

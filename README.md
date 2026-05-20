@@ -12,7 +12,7 @@ Root cause: TBD.
 
 The issue was first observed in epoch 265, where CPoC confirmation weights for Kimi
 participants dropped abnormally at block **4,103,171**. Epoch 266 is the primary nonce
-exclusion case and is fully analysed. Epochs 267 and 268 are complete; 265, 269–270 are in progress.
+exclusion case and is fully analysed. Epochs 265, 267, and 268 are complete; 269–270 are in progress.
 
 ---
 
@@ -84,21 +84,22 @@ node pinpointed the exact block:
 | First corrupted | **4,103,171** | 323 |
 
 3 participants had a CW drop >5% attributable to the bug. Compensation uses the
-implied reward rate from the epoch (`total_actual_rewards / total_cw_end`) applied
-to each victim's healthy-height CW, minus actual rewards received.
+standard epoch reward formula — `weight / total_epoch_weight × epoch_reward` —
+applied at the victim's actual epoch weight, minus actual rewards received.
+Total epoch weight (verified constant at 904,177 from block 4,095,000 through epoch end).
 
-`fair_reward = cw_healthy × (total_actual_paid / total_cw_end)`
+`fair_reward = weight / total_epoch_weight × epoch_reward`
 `compensation = max(0, fair_reward − actual_rewards)`
 
 ### Compensation Summary — Epoch 265
 
-| Address | cw@healthy | cw@end | drop | Owed (GONKA) |
-|---------|-----------|--------|------|-------------|
-| `gonka1j7x6dv42xehe9e5au4ku3wvzwtqlegfjhlvzj6` | 66,311 | 323 | 99.5% | **20,174.85** |
-| `gonka17pw6099q758qwzewtrqmqpf5c2lrhr97fwqexu` | 186,719 | 172,607 | 7.6% | **2,414.996** |
-| `gonka1830lqug50lse998x2lakk4pj5ypfumz5pasz0y` | 7,031 | 0 | 100% | **2,139.15** |
+| Address | weight | cw@healthy | cw@end | drop | Owed (GONKA) |
+|---------|--------|-----------|--------|------|-------------|
+| `gonka1j7x6dv42xehe9e5au4ku3wvzwtqlegfjhlvzj6` | 66,311 | 66,311 | 323 | 99.5% | **20,896.53** |
+| `gonka17pw6099q758qwzewtrqmqpf5c2lrhr97fwqexu` | 189,884 | 186,719 | 172,607 | 7.6% | **5,444.49** |
+| `gonka1830lqug50lse998x2lakk4pj5ypfumz5pasz0y` | 13,490 | 7,031 | 0 | 100% | **4,251.09** |
 
-**Epoch 265 Total: 24,728.998 GONKA**
+**Epoch 265 Total: 30,592.10 GONKA**
 
 Full output: [`e265/compensation_265.csv`](e265/compensation_265.csv) · [`e265/compensation_265.json`](e265/compensation_265.json)
 
@@ -239,13 +240,13 @@ Full output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/
 
 | Epoch | Compensation |
 |-------|-------------|
-| 265 | 24,728.998 GONKA |
+| 265 | 30,592.10 GONKA |
 | 266 | 188,698.47 GONKA |
 | 267 | 88,917.16 GONKA |
 | 268 | 65,241.37 GONKA |
 | 269 | in progress |
 | 270 | in progress |
-| **Total** | **367,586.00 GONKA** (partial) |
+| **Total** | **373,449.10 GONKA** (partial) |
 
 ---
 
