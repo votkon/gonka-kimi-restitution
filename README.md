@@ -1,8 +1,8 @@
-# Gonka Network — Epoch 266–270 Restitution Case
+# Gonka Network — Epoch 265–270 Restitution Case
 
 ## Overview
 
-This repository contains the restitution analysis for epochs 266 through 270 of the
+This repository contains the restitution analysis for epochs 265 through 270 of the
 Gonka network. Across all affected epochs, nonces submitted for the
 `moonshotai/Kimi-K2.6` model were not correctly counted when computing participant
 weights, causing a significant number of nodes to either be fully excluded from epochs
@@ -10,7 +10,9 @@ or to receive far less weight — and therefore far less reward — than they we
 
 Root cause: TBD.
 
-Epoch 266 is the primary case and is fully analysed here. Epochs 267 and 268 are complete; 269–270 are in progress.
+The issue was first observed in epoch 265, where CPoC confirmation weights for Kimi
+participants dropped abnormally at block **4,103,171**. Epoch 266 is the primary nonce
+exclusion case and is fully analysed. Epochs 267 and 268 are complete; 265, 269–270 are in progress.
 
 ---
 
@@ -18,6 +20,7 @@ Epoch 266 is the primary case and is fully analysed here. Epochs 267 and 268 are
 
 | Epoch | PoC Start | Epoch End | Reward Pool |
 |-------|-----------|-----------|-------------|
+| 265 | 4,089,970 | 4,105,360 | 284,932.49 GONKA |
 | 266 | 4,105,361 | 4,120,751 | 284,797.19 GONKA |
 | 267 | 4,120,752 | 4,136,142 | 284,661.95 GONKA |
 | 268 | 4,136,143 | 4,151,533 | 284,526.76 GONKA |
@@ -30,14 +33,19 @@ Epoch length: 15,391 blocks. Reward formula: `323,000 × e^(−0.000475 × (epoc
 
 ## Eligibility Criteria
 
-A participant is eligible for compensation only if they **successfully completed the
-epoch** — meaning they both confirmed work (have a `confirmation_weight` on-chain) AND
-received actual rewards from the chain. Participants who failed the epoch for any reason
-(dropped out of CPoC, invalidated, received zero rewards) are excluded from restitution:
-the bug caused underpayment to healthy participants, not an obligation to pay those who
-didn't pass.
+Eligibility rules differ by epoch type:
 
-This applies to all epochs and both compensation types.
+**Epochs 265–266 (nonce exclusion):** All participants who submitted valid Kimi nonces
+are eligible, including those who received zero rewards because the bug locked them out
+entirely. Zero rewards here is a direct consequence of the bug, not a failure by the
+participant.
+
+**Epochs 267–270 (ComputeGroupCap underpayment):** A participant is eligible only if
+they **successfully completed the epoch** — meaning they both confirmed work
+(`confirmation_weight` on-chain) AND received actual rewards. Participants who failed
+the epoch for any reason (dropped out of CPoC, invalidated, received zero rewards) are
+excluded: the bug caused underpayment to healthy participants, not an obligation to pay
+those who didn't pass.
 
 ---
 
@@ -59,6 +67,40 @@ The net extra loss for a delegator whose Kimi operator was excluded is **10%** o
 original consensus weight. This loss is directly attributable to the bug.
 
 Full mechanics documented in [`e266/DELEGATION.md`](e266/DELEGATION.md).
+
+---
+
+## Epoch 265 — Summary
+
+### The Bug
+
+All Kimi operators entered the epoch group — no exclusions. However, CPoC confirmation
+weights for Kimi participants dropped abnormally mid-epoch. Binary search on the archive
+node pinpointed the exact block:
+
+| State | Block | `gonka1j7x6dv42...` confirmation_weight |
+|-------|-------|----------------------------------------|
+| Last healthy | **4,103,170** | 66,311 |
+| First corrupted | **4,103,171** | 323 |
+
+3 participants had a CW drop >5% attributable to the bug. Compensation uses the
+implied reward rate from the epoch (`total_actual_rewards / total_cw_end`) applied
+to each victim's healthy-height CW, minus actual rewards received.
+
+`fair_reward = cw_healthy × (total_actual_paid / total_cw_end)`
+`compensation = max(0, fair_reward − actual_rewards)`
+
+### Compensation Summary — Epoch 265
+
+| Address | cw@healthy | cw@end | drop | Owed (GONKA) |
+|---------|-----------|--------|------|-------------|
+| `gonka1j7x6dv42xehe9e5au4ku3wvzwtqlegfjhlvzj6` | 66,311 | 323 | 99.5% | **20,174.85** |
+| `gonka17pw6099q758qwzewtrqmqpf5c2lrhr97fwqexu` | 186,719 | 172,607 | 7.6% | **2,414.996** |
+| `gonka1830lqug50lse998x2lakk4pj5ypfumz5pasz0y` | 7,031 | 0 | 100% | **2,139.15** |
+
+**Epoch 265 Total: 24,728.998 GONKA**
+
+Full output: [`e265/compensation_265.csv`](e265/compensation_265.csv) · [`e265/compensation_265.json`](e265/compensation_265.json)
 
 ---
 
@@ -193,16 +235,17 @@ Full output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/
 
 ---
 
-## Running Total (Epochs 266–268)
+## Running Total (Epochs 265–270)
 
 | Epoch | Compensation |
 |-------|-------------|
+| 265 | 24,728.998 GONKA |
 | 266 | 188,698.47 GONKA |
 | 267 | 88,917.16 GONKA |
 | 268 | 65,241.37 GONKA |
 | 269 | in progress |
 | 270 | in progress |
-| **Total** | **342,857.00 GONKA** (partial) |
+| **Total** | **367,586.00 GONKA** (partial) |
 
 ---
 
@@ -217,6 +260,10 @@ gonka-e26x-issue/
 │   ├── epoch267_commits.json
 │   ├── epoch268_commits.json
 │   └── epoch269_commits.json
+├── e265/                            ← epoch 265 analysis (CPoC degradation)
+│   ├── calculate_compensation_265.py
+│   ├── compensation_265.csv
+│   └── compensation_265.json
 ├── e266/                            ← epoch 266 full analysis
 │   ├── calculate_compensation_266.py  ← single script, fetches all data from chain
 │   ├── DELEGATION.md                  ← delegation mechanics and impact analysis
@@ -286,10 +333,11 @@ inferenced query inference poc-delegation <address> \
   --node <ARCHIVE_NODE> --height <poc_start - 500> -o json
 ```
 
-| Epoch | poc_start | epoch_end | snapshot_height |
-|-------|-----------|-----------|-----------------|
-| 266 | 4,105,361 | 4,120,751 | 4,104,861 |
-| 267 | 4,120,752 | 4,136,142 | 4,120,252 |
-| 268 | 4,136,143 | 4,151,533 | 4,135,643 |
-| 269 | 4,151,534 | 4,166,924 | 4,151,034 |
-| 270 | 4,166,925 | 4,182,315 | 4,166,425 |
+| Epoch | poc_start | epoch_end | snapshot_height | cpoc_cutoff |
+|-------|-----------|-----------|-----------------|-------------|
+| 265 | 4,089,970 | 4,105,360 | 4,089,470 | 4,103,170 |
+| 266 | 4,105,361 | 4,120,751 | 4,104,861 | — |
+| 267 | 4,120,752 | 4,136,142 | 4,120,252 | — |
+| 268 | 4,136,143 | 4,151,533 | 4,135,643 | — |
+| 269 | 4,151,534 | 4,166,924 | 4,151,034 | — |
+| 270 | 4,166,925 | 4,182,315 | 4,166,425 | — |
