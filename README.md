@@ -81,7 +81,7 @@ true Kimi work was invisible to the reward calculation.
 | `gonka1q5xt54wncgzk7dxv9x64uln68455g83wu9tugg` | 89,984 | 113,567.5 |
 | `gonka1qa90tgczc0k5dvk4l5nvlf5y6phgm6mg22sfjv` | 55,552 | 70,111.4 |
 | `gonka1jrgm47v5eg876udmzg6j6glqcsd5x0vk6crpax` | 25,664 | 32,390.2 |
-| `gonka1ujnc662v6g69jm6fgxnr79a2m7ehzeut059239` | 22,272 | — (Kimi only) |
+| `gonka1ujnc662v6g69jm6fgxnr79a2m7ehzeut059239` | 22,272 | 28,109.2 |
 | `gonka1xwkesaxvdadh9wt9yyladu0r260s7whklcktds` | 12,896 | 16,275.9 |
 | `gonka1c6fwzedfsmpu4jnjekv4cn7mvr7x7fuqd6uqt9` | 12,384 | 15,629.7 |
 | `gonka1wkgawwdzj623ss8eywayzdj6qcgr2llygactje` | 6,496 | 8,198.5 |
