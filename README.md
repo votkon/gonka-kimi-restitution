@@ -12,7 +12,7 @@ Root cause: TBD.
 
 The issue was first observed in epoch 265, where CPoC confirmation weights for Kimi
 participants dropped abnormally at block **4,103,171**. Epoch 266 is the primary nonce
-exclusion case and is fully analysed. Epochs 265, 267, and 268 are complete; 269–270 are in progress.
+exclusion case and is fully analysed. Epochs 265, 267, 268, and 269 are complete; 270 is in progress.
 
 ---
 
@@ -236,6 +236,30 @@ Full output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/
 
 ---
 
+## Epoch 269 — Summary
+
+### The Bug
+
+Same ComputeGroupCap issue as epochs 267–268. Kimi group weight again exceeded the cap
+(`cap_factor 0.75 × epoch 268 total weight`), applying a uniform scale factor to all
+Kimi participants' `ValidationWeight.Weight`. CW/weight ratio ~1.00× at epoch end
+reflects the cap still in effect.
+
+No delegation compensation needed.
+
+### Compensation Summary — Epoch 269
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 26 |
+| Affected participants | 19 |
+| Excluded (no conf_w or failed epoch) | 7 |
+| Total compensation | **48,012.52 GONKA** |
+
+Full output: [`e269/compensation_269.csv`](e269/compensation_269.csv) · [`e269/compensation_269.json`](e269/compensation_269.json)
+
+---
+
 ## Running Total (Epochs 265–270)
 
 | Epoch | Compensation |
@@ -244,9 +268,9 @@ Full output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/
 | 266 | 188,698.47 GONKA |
 | 267 | 88,917.16 GONKA |
 | 268 | 65,241.37 GONKA |
-| 269 | in progress |
+| 269 | 48,012.52 GONKA |
 | 270 | in progress |
-| **Total** | **373,449.10 GONKA** (partial) |
+| **Total** | **421,461.62 GONKA** (partial) |
 
 ---
 
@@ -277,10 +301,14 @@ gonka-e26x-issue/
 │   ├── GROUP_CAP.md                   ← cap mechanics and impact analysis
 │   ├── compensation_267.csv
 │   └── compensation_267.json
-└── e268/                            ← epoch 268 full analysis (ComputeGroupCap)
-    ├── calculate_compensation_268.py
-    ├── compensation_268.csv
-    └── compensation_268.json
+├── e268/                            ← epoch 268 full analysis (ComputeGroupCap)
+│   ├── calculate_compensation_268.py
+│   ├── compensation_268.csv
+│   └── compensation_268.json
+└── e269/                            ← epoch 269 full analysis (ComputeGroupCap)
+    ├── calculate_compensation_269.py
+    ├── compensation_269.csv
+    └── compensation_269.json
 ```
 
 Epochs 269–270 will follow the same structure once those epochs conclude.
