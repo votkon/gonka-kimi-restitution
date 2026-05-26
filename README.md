@@ -12,7 +12,7 @@ Root cause: TBD.
 
 The issue was first observed in epoch 265, where CPoC confirmation weights for Kimi
 participants dropped abnormally at block **4,103,171**. Epoch 266 is the primary nonce
-exclusion case and is fully analysed. Epochs 265–272 are complete.
+exclusion case and is fully analysed. Epochs 265–274 are complete.
 
 ---
 
@@ -327,7 +327,49 @@ Full output: [`e272/compensation_272.csv`](e272/compensation_272.csv) · [`e272/
 
 ---
 
-## Running Total (Epochs 265–272)
+## Epoch 273 — Summary
+
+### The Bug
+
+ComputeGroupCap still firing, scale 0.757. CW/weight ratio 1.18×.
+
+No delegation compensation needed.
+
+### Compensation Summary — Epoch 273
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 26 |
+| Affected participants | 19 |
+| Excluded (no conf_w or failed epoch) | 6 |
+| Total compensation | **50,077.52 GONKA** |
+
+Full output: [`e273/compensation_273.csv`](e273/compensation_273.csv) · [`e273/compensation_273.json`](e273/compensation_273.json)
+
+---
+
+## Epoch 274 — Summary
+
+### The Bug
+
+ComputeGroupCap still firing, scale 0.858. CW/weight ratio 0.97×.
+
+No delegation compensation needed.
+
+### Compensation Summary — Epoch 274
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 18 |
+| Affected participants | 9 |
+| Excluded (no conf_w or failed epoch) | 9 |
+| Total compensation | **47,718.95 GONKA** |
+
+Full output: [`e274/compensation_274.csv`](e274/compensation_274.csv) · [`e274/compensation_274.json`](e274/compensation_274.json)
+
+---
+
+## Running Total (Epochs 265–274)
 
 
 
@@ -341,7 +383,9 @@ Full output: [`e272/compensation_272.csv`](e272/compensation_272.csv) · [`e272/
 | 270 | 30,965.83 GONKA |
 | 271 | 38,178.79 GONKA |
 | 272 | 32,434.44 GONKA |
-| **Total** | **523,040.68 GONKA** |
+| 273 | 50,077.52 GONKA |
+| 274 | 47,718.95 GONKA |
+| **Total** | **620,837.15 GONKA** |
 
 ---
 
@@ -388,10 +432,18 @@ gonka-e26x-issue/
 │   ├── calculate_compensation_271.py
 │   ├── compensation_271.csv
 │   └── compensation_271.json
-└── e272/                            ← epoch 272 full analysis (ComputeGroupCap)
-    ├── calculate_compensation_272.py
-    ├── compensation_272.csv
-    └── compensation_272.json
+├── e272/                            ← epoch 272 full analysis (ComputeGroupCap)
+│   ├── calculate_compensation_272.py
+│   ├── compensation_272.csv
+│   └── compensation_272.json
+├── e273/                            ← epoch 273 full analysis (ComputeGroupCap)
+│   ├── calculate_compensation_273.py
+│   ├── compensation_273.csv
+│   └── compensation_273.json
+└── e274/                            ← epoch 274 full analysis (ComputeGroupCap)
+    ├── calculate_compensation_274.py
+    ├── compensation_274.csv
+    └── compensation_274.json
 ```
 
 Epochs 269–270 will follow the same structure once those epochs conclude.
