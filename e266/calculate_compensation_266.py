@@ -5,14 +5,17 @@ Epoch 266 Full Restitution Calculator
 All data is fetched live from the archive node. The poc_commits/ JSON files in this
 repo are reference artifacts only and are not read by this script.
 
-Two compensation components:
+The external attack on Kimi vLLM nodes that began in e265 escalated in e266, crashing
+most operators' inference nodes and causing mass nonce exclusion. Two compensation
+components:
 
 Part 1 — Nonce compensation (compensation_266_nonces.csv)
-  Participants whose Kimi nonces were not counted. Weight is reconstructed from
-  on-chain commits; fair share vs actual rewards determines the compensation.
+  Participants whose Kimi nonces were not counted due to the attack-induced exclusion.
+  Weight is reconstructed from on-chain commits; fair share vs actual rewards determines
+  the compensation.
 
 Part 2 — Delegation compensation (compensation_266_delegation.csv)
-  Participants who delegated Kimi to an excluded operator. The bug forced them into
+  Participants who delegated Kimi to an excluded operator. The exclusion forced them into
   ModeNone (15% penalty) instead of ModeDelegate (5% transfer) — a net 10% extra loss.
 
 Combined: compensation_266_combined.csv + compensation_266.json

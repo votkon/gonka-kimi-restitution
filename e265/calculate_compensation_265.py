@@ -3,9 +3,10 @@
 Epoch 265 Restitution Calculator — CPoC degradation at block 4103171
 
 Issue:
-  All Kimi operators entered the epoch group, but CPoC confirmation weights for
-  Kimi participants dropped abnormally at block 4103171. Binary search on the
-  archive node confirmed:
+  An unknown external actor conducted a targeted attack using malicious requests
+  designed to crash vLLM instances running the Kimi model. The attack first hit in
+  e265: CPoC confirmation weights for Kimi participants collapsed abnormally at block
+  4103171. Binary search on the archive node confirmed:
     - Last healthy state : block 4103170  (confirmation_weights intact)
     - First corrupted    : block 4103171  (confirmation_weights collapsed)
 

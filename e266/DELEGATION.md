@@ -1,8 +1,9 @@
-# Delegation Impact Analysis — Epoch 266 Kimi Nonce Bug
+# Delegation Impact Analysis — Epoch 266
 
 ## Background
 
-The Kimi nonce counting bug in epoch 266 caused 9 participants to be completely
+An external attack on Kimi vLLM nodes (which began in e265) escalated in epoch 266,
+crashing most operators' inference nodes and causing 9 participants to be completely
 excluded from the epoch group — they submitted Kimi nonces on-chain but their weight
 was never registered. As a result, anyone who had delegated their Kimi consensus weight
 to one of those excluded operators was also harmed indirectly via the delegation penalty
@@ -38,7 +39,7 @@ from epoch 251 onward. Epoch 266 > 251, so the Kimi penalty was active.
 
 ## What Happened in Epoch 266
 
-Because the Kimi nonce bug prevented 9 operators from entering the epoch, any
+Because the attack prevented 9 operators from entering the epoch, any
 participant whose Kimi delegation pointed at one of those operators was forced into
 **`ModeNone`** instead of `ModeDelegate`.
 
