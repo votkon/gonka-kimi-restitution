@@ -302,11 +302,13 @@ a consequence of two compounding factors, neither of which is a protocol bug:
    (e267) of the entire incident. The attack is external to the protocol — the
    chain behaved correctly given the state it observed.
 
-The compensation already paid (491,482 GONKA across e267–e276) was calculated
-and distributed as a good-faith measure to operators who were underpaid relative
-to their confirmed work under a broken parameter regime. That is distinct from
-GRC restitution, which addresses losses caused by protocol-level bugs.
+The calculated shortfall (491,482 GONKA across e267–e276) represents the
+difference between what operators should have received under correct parameters
+and what the chain actually paid. No compensation has been distributed yet.
 
-Opening a GRC case on this incident would set a precedent for compensating
-parameter miscalibration and externally-induced network disruptions — both of
-which are outside the GRC mandate.
+Regardless of whether these amounts are eventually paid out, this incident should
+not be opened as a GRC case. GRC restitution addresses losses caused by
+protocol-level bugs. This incident was caused by parameter miscalibration and an
+external attack — both outside the GRC mandate. Opening a GRC case here would set
+a precedent for compensating externally-induced network disruptions and parameter
+tuning decisions.
