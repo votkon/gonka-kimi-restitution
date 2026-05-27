@@ -6,7 +6,7 @@ This repository contains the restitution analysis for epochs 265 through 276 of 
 Gonka network. Two distinct bugs caused underpayment to `moonshotai/Kimi-K2.6` operators
 across these epochs:
 
-- **Epochs 265–266**: separate per-epoch bugs (CPoC degradation and nonce exclusion)
+- **Epochs 265–266**: separate per-epoch bugs (CPoC degradation and nonce exclusion due to third party actions)
 - **Epochs 267–276**: `ComputeGroupCap` underpayment — Kimi's confirmation weight
   persistently exceeded the cap (`0.75 × N-1 total network weight`), causing the chain
   to scale down every Kimi participant's effective weight and systematically underpay them
@@ -14,9 +14,6 @@ across these epochs:
 The cap breach was resolved by the v0.2.13 upgrade at block **4,267,300** (mid-epoch 276),
 which reduced Kimi's WeightScaleFactor to 0.78. Epoch 277 is the first clean epoch.
 
-**No compensation has been distributed yet.** All figures below are calculated shortfalls.
-
-Full root cause and weight history: [`weight_fluctuation_analysis.md`](weight_fluctuation_analysis.md)
 
 ---
 
