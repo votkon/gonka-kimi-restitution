@@ -1,62 +1,71 @@
-# Gonka Network — Epoch 265–270 Restitution Case
+# Gonka Network — Epoch 265–276 Restitution Case
 
 ## Overview
 
-This repository contains the restitution analysis for epochs 265 through 270 of the
-Gonka network. Across all affected epochs, nonces submitted for the
-`moonshotai/Kimi-K2.6` model were not correctly counted when computing participant
-weights, causing a significant number of nodes to either be fully excluded from epochs
-or to receive far less weight — and therefore far less reward — than they were entitled to.
+This repository contains the restitution analysis for epochs 265 through 276 of the
+Gonka network. Two distinct bugs caused underpayment to `moonshotai/Kimi-K2.6` operators
+across these epochs:
 
-Root cause: TBD.
+- **Epochs 265–266**: separate per-epoch bugs (CPoC degradation and nonce exclusion)
+- **Epochs 267–276**: `ComputeGroupCap` underpayment — Kimi's confirmation weight
+  persistently exceeded the cap (`0.75 × N-1 total network weight`), causing the chain
+  to scale down every Kimi participant's effective weight and systematically underpay them
 
-The issue was first observed in epoch 265, where CPoC confirmation weights for Kimi
-participants dropped abnormally at block **4,103,171**. Epoch 266 is the primary nonce
-exclusion case and is fully analysed. Epochs 265–274 are complete.
+The cap breach was resolved by the v0.2.13 upgrade at block **4,267,300** (mid-epoch 276),
+which reduced Kimi's WeightScaleFactor to 0.78. Epoch 277 is the first clean epoch.
+
+**No compensation has been distributed yet.** All figures below are calculated shortfalls.
+
+Full root cause and weight history: [`weight_fluctuation_analysis.md`](weight_fluctuation_analysis.md)
 
 ---
 
 ## Epoch Block Heights
 
-| Epoch | PoC Start | Epoch End | Reward Pool |
-|-------|-----------|-----------|-------------|
-| 265 | 4,089,970 | 4,105,360 | 284,932.49 GONKA |
-| 266 | 4,105,361 | 4,120,751 | 284,797.19 GONKA |
-| 267 | 4,120,752 | 4,136,142 | 284,661.95 GONKA |
-| 268 | 4,136,143 | 4,151,533 | 284,526.76 GONKA |
-| 269 | 4,151,534 | 4,166,924 | 284,391.65 GONKA |
-| 270 | 4,166,925 | 4,182,315 | 284,256.59 GONKA |
+| Epoch | PoC Start | Epoch End | Notes |
+|-------|-----------|-----------|-------|
+| 265 | 4,089,970 | 4,105,360 | |
+| 266 | 4,105,361 | 4,120,751 | |
+| 267 | 4,120,752 | 4,136,142 | |
+| 268 | 4,136,143 | 4,151,533 | |
+| 269 | 4,151,534 | 4,166,924 | |
+| 270 | 4,166,925 | 4,182,315 | |
+| 271 | 4,182,316 | 4,197,706 | |
+| 272 | 4,197,707 | 4,213,097 | |
+| 273 | 4,213,098 | 4,228,488 | |
+| 274 | 4,228,489 | 4,243,879 | |
+| 275 | 4,249,774 | 4,259,270 | |
+| 276 | 4,264,130 | 4,267,299 | cap ends at 4,267,299 (v0.2.13 upgrade at 4,267,300) |
 
-Epoch length: 15,391 blocks. Reward formula: `323,000 × e^(−0.000475 × (epoch − 1))` GONKA.
+Reward formula: `323,000 × e^(−0.000475 × (epoch − 1))` GONKA.
 
 ---
 
 ## Eligibility Criteria
 
-Eligibility rules differ by epoch type:
+**Epoch 265 (CPoC degradation):** Participants whose confirmation weight dropped
+abnormally mid-epoch due to a CPoC event at block 4,103,171. Compensation uses
+`weight / total_epoch_weight × epoch_reward − actual_rewards`.
 
-**Epochs 265–266 (nonce exclusion):** All participants who submitted valid Kimi nonces
-are eligible, including those who received zero rewards because the bug locked them out
-entirely. Zero rewards here is a direct consequence of the bug, not a failure by the
-participant.
+**Epoch 266 (nonce exclusion):** Participants who submitted valid Kimi nonces but were
+never registered in the epoch group (or had their Kimi contribution zeroed). Zero rewards
+here is a direct consequence of the bug. Delegation compensation is also included for
+participants whose operator was excluded.
 
-**Epochs 267–270 (ComputeGroupCap underpayment):** A participant is eligible only if
-they **successfully completed the epoch** — meaning they both confirmed work
+**Epochs 267–276 (ComputeGroupCap):** A participant is eligible only if they
+**successfully completed the epoch** — meaning they both confirmed work
 (`confirmation_weight` on-chain) AND received actual rewards. Participants who failed
-the epoch for any reason (dropped out of CPoC, invalidated, received zero rewards) are
-excluded: the bug caused underpayment to healthy participants, not an obligation to pay
-those who didn't pass.
+the epoch for any reason are excluded: the bug caused underpayment to healthy
+participants, not an obligation to pay those who didn't complete the epoch.
 
 ---
 
-## Delegation Impact
+## Delegation Impact (Epoch 266)
 
 Gonka uses a PoC delegation system where participants without direct MLNodes can
-delegate their consensus weight to an operator for a given model. Delegations are
-snapshotted `deploy_window = 500` blocks before the epoch PoC start.
-
-When an operator fails to enter the epoch (e.g. due to the Kimi nonce bug), the chain
-resolves all their delegators into **ModeNone** instead of **ModeDelegate**:
+delegate their consensus weight to an operator. When an operator fails to enter the
+epoch (due to the nonce bug), the chain resolves all their delegators into **ModeNone**
+instead of **ModeDelegate**:
 
 | Mode | Condition | Weight effect |
 |------|-----------|---------------|
@@ -64,34 +73,18 @@ resolves all their delegators into **ModeNone** instead of **ModeDelegate**:
 | `ModeNone` | Operator did not enter | −15% deducted as penalty |
 
 The net extra loss for a delegator whose Kimi operator was excluded is **10%** of their
-original consensus weight. This loss is directly attributable to the bug.
+original consensus weight.
 
-Full mechanics documented in [`e266/DELEGATION.md`](e266/DELEGATION.md).
+Full mechanics: [`e266/DELEGATION.md`](e266/DELEGATION.md)
 
 ---
 
-## Epoch 265 — Summary
+## Epoch 265 — CPoC Degradation
 
-### The Bug
+All Kimi operators entered the epoch group, but CPoC confirmation weights dropped
+abnormally at block **4,103,171**. 3 participants were affected.
 
-All Kimi operators entered the epoch group — no exclusions. However, CPoC confirmation
-weights for Kimi participants dropped abnormally mid-epoch. Binary search on the archive
-node pinpointed the exact block:
-
-| State | Block | `gonka1j7x6dv42...` confirmation_weight |
-|-------|-------|----------------------------------------|
-| Last healthy | **4,103,170** | 66,311 |
-| First corrupted | **4,103,171** | 323 |
-
-3 participants had a CW drop >5% attributable to the bug. Compensation uses the
-standard epoch reward formula — `weight / total_epoch_weight × epoch_reward` —
-applied at the victim's actual epoch weight, minus actual rewards received.
-Total epoch weight (verified constant at 904,177 from block 4,095,000 through epoch end).
-
-`fair_reward = weight / total_epoch_weight × epoch_reward`
-`compensation = max(0, fair_reward − actual_rewards)`
-
-### Compensation Summary — Epoch 265
+`compensation = max(0, weight / total_epoch_weight × epoch_reward − actual_rewards)`
 
 | Address | weight | cw@healthy | cw@end | drop | Owed (GONKA) |
 |---------|--------|-----------|--------|------|-------------|
@@ -99,45 +92,21 @@ Total epoch weight (verified constant at 904,177 from block 4,095,000 through ep
 | `gonka17pw6099q758qwzewtrqmqpf5c2lrhr97fwqexu` | 189,884 | 186,719 | 172,607 | 7.6% | **5,444.49** |
 | `gonka1830lqug50lse998x2lakk4pj5ypfumz5pasz0y` | 13,490 | 7,031 | 0 | 100% | **4,251.09** |
 
-**Epoch 265 Total: 30,592.10 GONKA**
+**Epoch 265 Total: 30,592.10 GONKA** (3 participants)
 
-Full output: [`e265/compensation_265.csv`](e265/compensation_265.csv) · [`e265/compensation_265.json`](e265/compensation_265.json)
+Output: [`e265/compensation_265.csv`](e265/compensation_265.csv) · [`e265/compensation_265.json`](e265/compensation_265.json)
 
 ---
 
-## Epoch 266 — Full Analysis
+## Epoch 266 — Nonce Exclusion
 
-### The Bug
+9 participants submitted Kimi nonces and had their commits recorded on-chain but were
+never registered in the epoch group. A further 9 participants entered the epoch but with
+their Kimi contribution partially zeroed out. The on-chain total epoch weight was
+**335,159** — the correctly reconstructed weight from all nonce commits is **1,079,698**,
+meaning ~69% of the network's true Kimi work was invisible to the reward calculation.
 
-9 participants submitted Kimi nonces and had their commits recorded on-chain, but were
-never registered in the epoch group. A further 6 participants entered the epoch but
-with their Kimi contribution zeroed out, receiving only Qwen-derived weight.
-
-The on-chain total epoch weight was **335,159** — the correctly reconstructed weight
-from all nonce commits is **1,079,698**, revealing that roughly 69% of the network's
-true Kimi work was invisible to the reward calculation.
-
-### Excluded Operators (submitted Kimi nonces, not in epoch group)
-
-| Address | Kimi nonces | Reconstructed Kimi weight |
-|---------|-------------|--------------------------|
-| `gonka1q5xt54wncgzk7dxv9x64uln68455g83wu9tugg` | 89,984 | 113,567.5 |
-| `gonka1qa90tgczc0k5dvk4l5nvlf5y6phgm6mg22sfjv` | 55,552 | 70,111.4 |
-| `gonka1jrgm47v5eg876udmzg6j6glqcsd5x0vk6crpax` | 25,664 | 32,390.2 |
-| `gonka1ujnc662v6g69jm6fgxnr79a2m7ehzeut059239` | 22,272 | 28,109.2 |
-| `gonka1xwkesaxvdadh9wt9yyladu0r260s7whklcktds` | 12,896 | 16,275.9 |
-| `gonka1c6fwzedfsmpu4jnjekv4cn7mvr7x7fuqd6uqt9` | 12,384 | 15,629.7 |
-| `gonka1wkgawwdzj623ss8eywayzdj6qcgr2llygactje` | 6,496 | 8,198.5 |
-| `gonka18xeqnspxpg2vncufnjne485rkaagwvz7whyn0d` | 6,080 | 7,673.5 |
-| `gonka125n6kr5gvdup0lndfkps7t6rd6592panhrg3np` | 6,048 | 7,633.1 |
-| `gonka1yal0ysgzc860zt3y8cds8656tnueusgymftvkw` | 5,664 | 7,148.5 |
-
-### Compensation Summary — Epoch 266
-
-#### Part 1: Nonce compensation (18 participants)
-
-Methodology: reconstruct each participant's weight from on-chain commits, compute their
-fair share of the epoch reward pool, subtract actual rewards received.
+### Part 1: Nonce compensation (18 participants)
 
 `compensation = max(0, reconstructed_weight / total_reconstructed_weight × epoch_reward − actual_rewards)`
 
@@ -155,11 +124,11 @@ fair share of the epoch reward pool, subtract actual rewards received.
 
 **Part 1 total: 183,605.74 GONKA**
 
-#### Part 2: Delegation compensation (9 participants)
+### Part 2: Delegation compensation (9 participants)
 
 9 participants delegated their Kimi weight to `gonka1q5xt54...` (excluded operator).
-The chain penalised them 15% (ModeNone) instead of transferring 5% (ModeDelegate).
-Net extra weight loss: 10% of original consensus weight per participant.
+The chain penalised them 15% (ModeNone) instead of transferring 5% (ModeDelegate) —
+net extra weight loss of 10% per participant.
 
 `compensation = (original_weight × 0.10) / total_epoch_weight × epoch_reward`
 
@@ -177,25 +146,21 @@ Net extra weight loss: 10% of original consensus weight per participant.
 
 **Part 2 total: 5,092.73 GONKA**
 
-### Epoch 266 Grand Total: 188,698.47 GONKA
+**Epoch 266 Grand Total: 188,698.47 GONKA** (18 nonce + 9 delegation participants)
+
+Output: [`e266/compensation_266.json`](e266/compensation_266.json)
 
 ---
 
-## Epoch 267 — Summary
+## Epoch 267 — ComputeGroupCap (worst epoch)
 
-### The Bug
-
-All Kimi operators entered the epoch, but the Kimi model group's raw weight (**899,487**)
-exceeded the ComputeGroupCap (`cap_factor 0.75 × epoch 266 total weight 335,159 = 251,369`).
-The chain applied a uniform scale factor of ~0.28× to every Kimi participant's
-`ValidationWeight.Weight`, systematically underpaying all Kimi contributors.
-
-No delegation compensation is needed: all operators entered the epoch group.
-
-### Compensation Summary — Epoch 267
-
-Methodology: use `confirmation_weight` (CPoC-verified actual work, unaffected by the cap)
-as the fair reward basis.
+All Kimi operators entered the epoch, but the Kimi group's raw weight (**899,487**)
+far exceeded the ComputeGroupCap (`0.75 × epoch 266 total weight 335,159 = 251,369`).
+The e266 total weight was severely depressed by a targeted external attack on Kimi
+vLLM nodes, which crashed most operators and collapsed network weight to 335k. This
+destroyed the N-1 reference weight used by the cap formula for e267 — when Kimi
+operators returned with full accumulated confirmation weight, the mismatch caused the
+worst inversion of the entire incident (conf/weight ratio 1.75×).
 
 `compensation = max(0, confirmation_weight / total_confirmation_weight × epoch_reward − actual_rewards)`
 
@@ -203,189 +168,164 @@ as the fair reward basis.
 |--------|-------|
 | Kimi participants in epoch | 27 |
 | Affected participants | 21 |
-| Excluded (no Kimi commits or failed epoch) | 30 |
 | Total compensation | **88,917.16 GONKA** |
 
-Full output: [`e267/compensation_267.csv`](e267/compensation_267.csv) · [`e267/compensation_267.json`](e267/compensation_267.json)
-
-Cap mechanics documented in [`e267/GROUP_CAP.md`](e267/GROUP_CAP.md).
+Output: [`e267/compensation_267.csv`](e267/compensation_267.csv) · [`e267/compensation_267.json`](e267/compensation_267.json)
 
 ---
 
-## Epoch 268 — Summary
+## Epoch 268 — ComputeGroupCap
 
-### The Bug
-
-Same ComputeGroupCap issue as epoch 267. The cap baseline rose (using epoch 267's total
-weight), but Kimi raw weight grew proportionally, keeping the group above the cap.
-The conf/weight ratio of ~0.86× indicates a less severe squeeze than epoch 267
-but still resulted in systematic underpayment.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 268
-
-| Metric | Value |
-|--------|-------|
-| Kimi participants in epoch | 14 |
-| Affected participants | 11 |
-| Excluded (no Kimi commits or failed epoch) | 46 |
-| Total compensation | **65,241.37 GONKA** |
-
-Full output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/compensation_268.json`](e268/compensation_268.json)
-
----
-
-## Epoch 269 — Summary
-
-### The Bug
-
-Same ComputeGroupCap issue as epochs 267–268. Kimi group weight again exceeded the cap
-(`cap_factor 0.75 × epoch 268 total weight`), applying a uniform scale factor to all
-Kimi participants' `ValidationWeight.Weight`. CW/weight ratio ~1.00× at epoch end
-reflects the cap still in effect.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 269
-
-| Metric | Value |
-|--------|-------|
-| Kimi participants in epoch | 26 |
-| Affected participants | 19 |
-| Excluded (no conf_w or failed epoch) | 7 |
-| Total compensation | **48,012.52 GONKA** |
-
-Full output: [`e269/compensation_269.csv`](e269/compensation_269.csv) · [`e269/compensation_269.json`](e269/compensation_269.json)
-
----
-
-## Epoch 270 — Summary
-
-### The Bug
-
-Same ComputeGroupCap issue as epochs 267–269. Scale factor of 0.755 — worse than
-projected due to higher Kimi nonce volume (549,664 vs ~438k average). CW/weight
-ratio of 1.23× confirms significant underpayment.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 270
-
-| Metric | Value |
-|--------|-------|
-| Kimi participants in epoch | 22 |
-| Affected participants | 16 |
-| Excluded (no conf_w or failed epoch) | 3 |
-| Total compensation | **30,965.83 GONKA** |
-
-Full output: [`e270/compensation_270.csv`](e270/compensation_270.csv) · [`e270/compensation_270.json`](e270/compensation_270.json)
-
----
-
-## Epoch 271 — Summary
-
-### The Bug
-
-Same ComputeGroupCap issue. Scale factor ~0.86× (cap 538k vs raw 625k). CW/weight
-ratio of 0.95× at epoch end — cap still firing despite the ratio inverting, because
-the chain's weight formula applies the cap before CPoC confirmation runs.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 271
+Cap baseline rose (using epoch 267's total weight), but Kimi's conf_weight remained
+above cap at 85.2% of total network weight. Conf/weight ratio 0.85×.
 
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 20 |
+| Affected participants | 11 |
+| Total compensation | **65,241.37 GONKA** |
+
+Output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/compensation_268.json`](e268/compensation_268.json)
+
+---
+
+## Epoch 269 — ComputeGroupCap
+
+Kimi conf_weight at 87.6% of total network weight. Conf/weight ratio ~1.00×.
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 30 |
+| Affected participants | 19 |
+| Total compensation | **48,012.52 GONKA** |
+
+Output: [`e269/compensation_269.csv`](e269/compensation_269.csv) · [`e269/compensation_269.json`](e269/compensation_269.json)
+
+---
+
+## Epoch 270 — ComputeGroupCap
+
+Kimi conf_weight at 94.9% of total network weight. Conf/weight ratio 1.23×.
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 23 |
+| Affected participants | 16 |
+| Total compensation | **30,965.83 GONKA** |
+
+Output: [`e270/compensation_270.csv`](e270/compensation_270.csv) · [`e270/compensation_270.json`](e270/compensation_270.json)
+
+---
+
+## Epoch 271 — ComputeGroupCap
+
+Kimi conf_weight at 80.5% of total network weight. Conf/weight ratio 0.95×.
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 23 |
 | Affected participants | 17 |
-| Excluded (no conf_w or failed epoch) | 3 |
 | Total compensation | **38,178.79 GONKA** |
 
-Full output: [`e271/compensation_271.csv`](e271/compensation_271.csv) · [`e271/compensation_271.json`](e271/compensation_271.json)
+Output: [`e271/compensation_271.csv`](e271/compensation_271.csv) · [`e271/compensation_271.json`](e271/compensation_271.json)
 
 ---
 
-## Epoch 272 — Summary
+## Epoch 272 — ComputeGroupCap
 
-### The Bug
-
-ComputeGroupCap still firing, scale 0.926. CW/weight ratio 0.88×.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 272
+Kimi conf_weight at 80.0% of total network weight. Conf/weight ratio 0.88×.
 
 | Metric | Value |
 |--------|-------|
-| Kimi participants in epoch | 18 |
+| Kimi participants in epoch | 23 |
 | Affected participants | 11 |
-| Excluded (no conf_w or failed epoch) | 7 |
 | Total compensation | **32,434.44 GONKA** |
 
-Full output: [`e272/compensation_272.csv`](e272/compensation_272.csv) · [`e272/compensation_272.json`](e272/compensation_272.json)
+Output: [`e272/compensation_272.csv`](e272/compensation_272.csv) · [`e272/compensation_272.json`](e272/compensation_272.json)
 
 ---
 
-## Epoch 273 — Summary
+## Epoch 273 — ComputeGroupCap (second inversion)
 
-### The Bug
-
-ComputeGroupCap still firing, scale 0.757. CW/weight ratio 1.18×.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 273
+Kimi node count jumped to 81 nodes (30 participants). Kimi conf_weight reached 107.5%
+of total network weight — a second inversion. Conf/weight ratio 1.18×.
 
 | Metric | Value |
 |--------|-------|
-| Kimi participants in epoch | 26 |
+| Kimi participants in epoch | 30 |
 | Affected participants | 19 |
-| Excluded (no conf_w or failed epoch) | 6 |
 | Total compensation | **50,077.52 GONKA** |
 
-Full output: [`e273/compensation_273.csv`](e273/compensation_273.csv) · [`e273/compensation_273.json`](e273/compensation_273.json)
+Output: [`e273/compensation_273.csv`](e273/compensation_273.csv) · [`e273/compensation_273.json`](e273/compensation_273.json)
 
 ---
 
-## Epoch 274 — Summary
+## Epoch 274 — ComputeGroupCap
 
-### The Bug
-
-ComputeGroupCap still firing, scale 0.858. CW/weight ratio 0.97×.
-
-No delegation compensation needed.
-
-### Compensation Summary — Epoch 274
+Kimi conf_weight at 88.5% of total network weight. Conf/weight ratio 0.97×.
 
 | Metric | Value |
 |--------|-------|
-| Kimi participants in epoch | 18 |
+| Kimi participants in epoch | 24 |
 | Affected participants | 9 |
-| Excluded (no conf_w or failed epoch) | 9 |
 | Total compensation | **47,718.95 GONKA** |
 
-Full output: [`e274/compensation_274.csv`](e274/compensation_274.csv) · [`e274/compensation_274.json`](e274/compensation_274.json)
+Output: [`e274/compensation_274.csv`](e274/compensation_274.csv) · [`e274/compensation_274.json`](e274/compensation_274.json)
 
 ---
 
-## Running Total (Epochs 265–274)
+## Epoch 275 — ComputeGroupCap
 
+Kimi conf_weight at 103.6% of total network weight. Conf/weight ratio 1.28×.
 
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 24 |
+| Affected participants | 15 |
+| Total compensation | **33,938.75 GONKA** |
 
-| Epoch | Compensation |
-|-------|-------------|
-| 265 | 30,592.10 GONKA |
-| 266 | 188,698.47 GONKA |
-| 267 | 88,917.16 GONKA |
-| 268 | 65,241.37 GONKA |
-| 269 | 48,012.52 GONKA |
-| 270 | 30,965.83 GONKA |
-| 271 | 38,178.79 GONKA |
-| 272 | 32,434.44 GONKA |
-| 273 | 50,077.52 GONKA |
-| 274 | 47,718.95 GONKA |
-| **Total** | **620,837.15 GONKA** |
+Output: [`e275/compensation_275.csv`](e275/compensation_275.csv) · [`e275/compensation_275.json`](e275/compensation_275.json)
+
+---
+
+## Epoch 276 — ComputeGroupCap (partial epoch)
+
+v0.2.13 activated at block **4,267,300** (mid-epoch), which reduced Kimi's
+WeightScaleFactor to 0.78 and ended the cap breach. Compensation is calculated against
+group state at block **4,267,299** (the last pre-upgrade block). Kimi conf_weight was
+at 101.8% of total network weight in the pre-upgrade portion.
+
+| Metric | Value |
+|--------|-------|
+| Kimi participants in epoch | 23 |
+| Affected participants | 11 |
+| Total compensation | **55,996.81 GONKA** |
+
+Output: [`e276/compensation_276.csv`](e276/compensation_276.csv) · [`e276/compensation_276.json`](e276/compensation_276.json)
+
+---
+
+## Grand Total
+
+| Epoch | Issue | Affected | Compensation (GONKA) |
+|-------|-------|---------|---------------------|
+| 265 | CPoC degradation | 3 | 30,592.10 |
+| 266 | Nonce exclusion + delegation | 18 + 9 | 188,698.47 |
+| 267 | ComputeGroupCap | 21 | 88,917.16 |
+| 268 | ComputeGroupCap | 11 | 65,241.37 |
+| 269 | ComputeGroupCap | 19 | 48,012.52 |
+| 270 | ComputeGroupCap | 16 | 30,965.83 |
+| 271 | ComputeGroupCap | 17 | 38,178.79 |
+| 272 | ComputeGroupCap | 11 | 32,434.44 |
+| 273 | ComputeGroupCap | 19 | 50,077.52 |
+| 274 | ComputeGroupCap | 9 | 47,718.95 |
+| 275 | ComputeGroupCap | 15 | 33,938.75 |
+| 276 | ComputeGroupCap (partial) | 11 | 55,996.81 |
+| **TOTAL** | | **52 unique addresses** | **710,772.72 GONKA** |
+
+Per-address breakdown: [`aggregate_compensation.json`](aggregate_compensation.json) · [`aggregate_compensation.csv`](aggregate_compensation.csv)
+
+Issue resolved in e277 following v0.2.13 upgrade. No further compensation required.
 
 ---
 
@@ -393,60 +333,31 @@ Full output: [`e274/compensation_274.csv`](e274/compensation_274.csv) · [`e274/
 
 ```
 gonka-e26x-issue/
-├── README.md                        ← this file
-├── poc_commits/                     ← reference: raw nonce commits fetched from chain
-│   ├── README.md                    ← fetch commands and block heights
-│   ├── epoch266_commits.json
-│   ├── epoch267_commits.json
-│   ├── epoch268_commits.json
-│   └── epoch269_commits.json
-├── e265/                            ← epoch 265 analysis (CPoC degradation)
+├── README.md                          ← this file
+├── weight_fluctuation_analysis.md     ← full root cause analysis, Kimi weight history
+├── aggregate_compensation.py          ← aggregates all epochs into per-address totals
+├── aggregate_compensation.json        ← per-address totals (machine-readable)
+├── aggregate_compensation.csv         ← per-address totals (spreadsheet)
+├── poc_commits/                       ← raw nonce commits fetched from chain
+├── e265/                              ← CPoC degradation
 │   ├── calculate_compensation_265.py
 │   ├── compensation_265.csv
 │   └── compensation_265.json
-├── e266/                            ← epoch 266 full analysis
-│   ├── calculate_compensation_266.py  ← single script, fetches all data from chain
-│   ├── DELEGATION.md                  ← delegation mechanics and impact analysis
-│   ├── compensation_266_nonces.csv    ← Part 1 output
-│   ├── compensation_266_delegation.csv ← Part 2 output
-│   ├── compensation_266_combined.csv  ← all addresses, both components, totals
-│   └── compensation_266.json          ← full structured output
-├── e267/                            ← epoch 267 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_267.py
-│   ├── GROUP_CAP.md                   ← cap mechanics and impact analysis
-│   ├── compensation_267.csv
-│   └── compensation_267.json
-├── e268/                            ← epoch 268 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_268.py
-│   ├── compensation_268.csv
-│   └── compensation_268.json
-├── e269/                            ← epoch 269 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_269.py
-│   ├── compensation_269.csv
-│   └── compensation_269.json
-├── e270/                            ← epoch 270 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_270.py
-│   ├── compensation_270.csv
-│   └── compensation_270.json
-├── e271/                            ← epoch 271 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_271.py
-│   ├── compensation_271.csv
-│   └── compensation_271.json
-├── e272/                            ← epoch 272 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_272.py
-│   ├── compensation_272.csv
-│   └── compensation_272.json
-├── e273/                            ← epoch 273 full analysis (ComputeGroupCap)
-│   ├── calculate_compensation_273.py
-│   ├── compensation_273.csv
-│   └── compensation_273.json
-└── e274/                            ← epoch 274 full analysis (ComputeGroupCap)
-    ├── calculate_compensation_274.py
-    ├── compensation_274.csv
-    └── compensation_274.json
+├── e266/                              ← nonce exclusion + delegation
+│   ├── calculate_compensation_266.py
+│   ├── DELEGATION.md
+│   ├── compensation_266_nonces.csv
+│   ├── compensation_266_delegation.csv
+│   ├── compensation_266_combined.csv
+│   └── compensation_266.json
+├── e267/ … e276/                      ← ComputeGroupCap (one directory per epoch)
+│   ├── calculate_compensation_<N>.py
+│   ├── compensation_<N>.csv
+│   ├── compensation_<N>.json
+│   ├── epoch<N>_commits.json
+│   ├── epoch<N>_group_data.json
+│   └── epoch<N>_performance.json
 ```
-
-Epochs 269–270 will follow the same structure once those epochs conclude.
 
 ---
 
@@ -459,32 +370,28 @@ ARCHIVE_NODE_URL=http://<archive-node>:26657
 INFERENCED_BINARY=/path/to/inferenced
 ```
 
-The `.env` is loaded from `../gonka-segment-report/.env` (archive node IP is not
-committed to this repo).
+The `.env` is loaded from `../gonka-segment-report/.env`.
 
 ```bash
-# Epoch 266
-python3 e266/calculate_compensation_266.py
-```
+# Run any epoch's calculator
+python3 e267/calculate_compensation_267.py
 
-The script fetches all data live from the archive node (commits, group data,
-performance summaries, delegation snapshots) and writes outputs into `e266/`.
-The JSON files in `e266/` and `poc_commits/` are reference artifacts produced by
-prior runs and kept for auditability.
+# Regenerate aggregate per-address totals
+python3 aggregate_compensation.py
+```
 
 ---
 
 ## Chain Query Reference
 
-All queries use the archive node with `--height` pinned to the epoch end block to
-read state before on-chain pruning removes it.
+All queries use `--height` pinned to the epoch end block to read state before pruning.
 
 ```bash
 # PoC nonce commits for an epoch
 inferenced query inference all-poc-v2-store-commits <poc_start> \
   --node <ARCHIVE_NODE> --height <epoch_end> -o json
 
-# Epoch group data (on-chain weights)
+# Epoch group data (validation weights, confirmation weights)
 inferenced query inference show-epoch-group-data <epoch> \
   --node <ARCHIVE_NODE> --height <epoch_end> -o json
 
@@ -497,11 +404,17 @@ inferenced query inference poc-delegation <address> \
   --node <ARCHIVE_NODE> --height <poc_start - 500> -o json
 ```
 
-| Epoch | poc_start | epoch_end | snapshot_height | cpoc_cutoff |
-|-------|-----------|-----------|-----------------|-------------|
-| 265 | 4,089,970 | 4,105,360 | 4,089,470 | 4,103,170 |
-| 266 | 4,105,361 | 4,120,751 | 4,104,861 | — |
-| 267 | 4,120,752 | 4,136,142 | 4,120,252 | — |
-| 268 | 4,136,143 | 4,151,533 | 4,135,643 | — |
-| 269 | 4,151,534 | 4,166,924 | 4,151,034 | — |
-| 270 | 4,166,925 | 4,182,315 | 4,166,425 | — |
+| Epoch | poc_start | epoch_end |
+|-------|-----------|-----------|
+| 265 | 4,089,970 | 4,105,360 |
+| 266 | 4,105,361 | 4,120,751 |
+| 267 | 4,120,752 | 4,136,142 |
+| 268 | 4,136,143 | 4,151,533 |
+| 269 | 4,151,534 | 4,166,924 |
+| 270 | 4,166,925 | 4,182,315 |
+| 271 | 4,182,316 | 4,197,706 |
+| 272 | 4,197,707 | 4,213,097 |
+| 273 | 4,213,098 | 4,228,488 |
+| 274 | 4,228,489 | 4,243,879 |
+| 275 | 4,249,774 | 4,259,270 |
+| 276 | 4,264,130 | 4,267,299 |
