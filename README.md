@@ -6,10 +6,14 @@ This repository contains the restitution analysis for epochs 265 through 276 of 
 Gonka network. Two distinct bugs caused underpayment to `moonshotai/Kimi-K2.6` operators
 across these epochs:
 
-- **Epochs 265–266**: separate per-epoch bugs (CPoC degradation and nonce exclusion due to third party actions)
-- **Epochs 267–276**: `ComputeGroupCap` underpayment — Kimi's confirmation weight
-  persistently exceeded the cap (`0.75 × N-1 total network weight`), causing the chain
-  to scale down every Kimi participant's effective weight and systematically underpay them
+- **Epochs 265–266**: external attack — an unknown actor sent malicious requests targeting
+  Kimi vLLM nodes starting in e265, causing CPoC confirmation weight degradation, and
+  escalating in e266 to crash most operators and cause mass nonce exclusion; delegation
+  compensation included for e266 delegators
+- **Epochs 267–276**: `ComputeGroupCap` underpayment — the e266 collapse destroyed the
+  N-1 reference weight used by the cap formula, and when Kimi operators returned in e267
+  with full accumulated confirmation weight the mismatch caused a severe inversion;
+  the cap remained triggered every epoch until the v0.2.13 upgrade
 
 The cap breach was resolved by the v0.2.13 upgrade at block **4,267,300** (mid-epoch 276),
 which reduced Kimi's WeightScaleFactor to 0.78. Epoch 277 is the first clean epoch.
@@ -40,14 +44,15 @@ Reward formula: `323,000 × e^(−0.000475 × (epoch − 1))` GONKA.
 
 ## Eligibility Criteria
 
-**Epoch 265 (CPoC degradation):** Participants whose confirmation weight dropped
-abnormally mid-epoch due to a CPoC event at block 4,103,171. Compensation uses
-`weight / total_epoch_weight × epoch_reward − actual_rewards`.
+**Epoch 265 (external attack — CPoC degradation):** Participants whose confirmation
+weight dropped abnormally mid-epoch at block 4,103,171 due to the attack. Compensation
+uses `weight / total_epoch_weight × epoch_reward − actual_rewards`.
 
-**Epoch 266 (nonce exclusion):** Participants who submitted valid Kimi nonces but were
-never registered in the epoch group (or had their Kimi contribution zeroed). Zero rewards
-here is a direct consequence of the bug. Delegation compensation is also included for
-participants whose operator was excluded.
+**Epoch 266 (external attack — nonce exclusion):** The attack escalated, crashing most
+Kimi operators and causing mass nonce exclusion. Participants who submitted valid Kimi
+nonces but were never registered in the epoch group (or had their Kimi contribution
+zeroed) are eligible. Delegation compensation is also included for participants whose
+operator was excluded.
 
 **Epochs 267–276 (ComputeGroupCap):** A participant is eligible only if they
 **successfully completed the epoch** — meaning they both confirmed work
@@ -76,10 +81,11 @@ Full mechanics: [`e266/DELEGATION.md`](e266/DELEGATION.md)
 
 ---
 
-## Epoch 265 — CPoC Degradation
+## Epoch 265 — External Attack (CPoC Degradation)
 
 All Kimi operators entered the epoch group, but CPoC confirmation weights dropped
-abnormally at block **4,103,171**. 3 participants were affected.
+abnormally at block **4,103,171** as a result of the external attack on Kimi vLLM nodes.
+3 participants were affected.
 
 `compensation = max(0, weight / total_epoch_weight × epoch_reward − actual_rewards)`
 
@@ -95,10 +101,11 @@ Output: [`e265/compensation_265.csv`](e265/compensation_265.csv) · [`e265/compe
 
 ---
 
-## Epoch 266 — Nonce Exclusion
+## Epoch 266 — External Attack (Nonce Exclusion)
 
-9 participants submitted Kimi nonces and had their commits recorded on-chain but were
-never registered in the epoch group. A further 9 participants entered the epoch but with
+The attack escalated in e266, crashing most Kimi operators' inference nodes and causing
+mass exclusion from the epoch. 9 participants submitted Kimi nonces and had their commits
+recorded on-chain but were never registered in the epoch group. A further 9 participants entered the epoch but with
 their Kimi contribution partially zeroed out. The on-chain total epoch weight was
 **335,159** — the correctly reconstructed weight from all nonce commits is **1,079,698**,
 meaning ~69% of the network's true Kimi work was invisible to the reward calculation.
