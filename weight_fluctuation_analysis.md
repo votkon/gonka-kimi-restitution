@@ -61,6 +61,88 @@ the network.
 
 ---
 
+## Root Cause: What Started the Breakdown
+
+### Phase 1 — Kimi introduction (e251–e252)
+
+Kimi-K2.6 was added to the network in epoch 251 with `penalty_start_epoch=251`.
+Initial adoption was tiny: 5 participants, 6 nodes, conf_weight at 4.9% of total.
+The network total weight was ~700–860k, dominated by Qwen operators.
+
+### Phase 2 — Explosive node count growth (e253–e258)
+
+Between e252 and e253 something decisive happened: Kimi conf_weight jumped from
+5.7% to **51.0%** in a single epoch. The participant count went from 3 to 9 and
+nodes from 3 to 10, but that alone doesn't explain the conf_weight explosion.
+The key factor was that early Kimi operators had accumulated very high
+`confirmation_weight` through CPoC rounds (e.g. `gonka17gpuntq09` had conf=110k
+on a val_weight of only 1,023 — a 107x multiplier). When those operators re-entered
+after absence, their stored CW dominated the subgroup instantly.
+
+From e253 onward the growth was relentless:
+
+| Epoch | Kimi nodes | Kimi conf% |
+|-------|-----------|-----------|
+| e252  | 3         | 5.7%      |
+| e253  | 10        | 51.0%     |
+| e254  | 34        | 60.0%     |
+| e255  | 47        | 65.1%     |
+| e256  | 49        | 70.3%     |
+| e257  | 48        | 70.9%     |
+| e258  | 52        | 72.7%     |
+
+Each epoch ~5–10 new nodes joined. Kimi's original WSF was much higher than
+Qwen's (0.3593), meaning each Kimi nonce contributed far more raw weight, and
+CPoC accumulation compounded that advantage rapidly.
+
+### Phase 3 — Cap first breached (e262–e264)
+
+By e260 Kimi was at 73.2% of total — brushing the 75% cap. e262 was the first
+clear breach at **76.8%**, with 21 participants and 57 nodes. e263 followed at
+75.6%, e264 at 74.0% (just under). At this point the Qwen network was still
+large (~1.0–1.1M total weight) which kept Kimi from going further.
+
+### Phase 4 — Qwen network shrinks, cap triggers hard (e265)
+
+Between e264 and e265, total network weight dropped from 1.01M to **904k** as
+Qwen operators churned out. Kimi lost some nodes too (59→44) but the Qwen exit
+was proportionally larger. This tipped the balance: Kimi conf_weight hit 70.9%
+in e265, triggering the cap for the first time on a significant scale (3 operators
+affected, 30,592 GONKA compensation).
+
+### Phase 5 — The nonce bug collapse and weight inversion (e266→e267)
+
+e266 was hit by a separate nonce bug that excluded most Kimi operators, collapsing
+the Kimi presence to 8 participants and 9 nodes. Total network weight crashed to
+335k as the Kimi weight disappeared. This became the **N-1 reference weight** used
+by the cap formula for e267.
+
+When Kimi operators returned in e267 — now with 27 participants and **81 nodes**,
+many carrying large accumulated CW — the subgroup's conf_weight was 915k against
+a cap reference of only 335k × 0.75 = 251k. Kimi's weight was **3.6× above the
+cap**, causing the 169.1% conf% figure and 88,917 GONKA in compensation — the
+worst single epoch of the entire incident.
+
+The nonce bug collapse in e266, by destroying the N-1 reference weight, directly
+caused the severity of the e267 inversion. Without it, the cap formula would have
+used a ~900k reference and the breach would have been far smaller.
+
+### Phase 6 — Persistent breach despite partial recovery (e268–e275)
+
+After e267 the network restabilised somewhat — total weight recovered to 700–820k
+as Qwen operators returned. But Kimi's node count never dropped below 52 again
+(compared to ~50 pre-e266), and the CW accumulation advantage meant conf_weight
+stayed at 80–105% of total. The cap remained triggered every epoch.
+
+### Resolution — v0.2.13 WSF reduction (e277)
+
+v0.2.13 (block 4,267,300) reduced Kimi's WeightScaleFactor from its original high
+value to **0.78**. This directly reduced the confirmation_weight each Kimi nonce
+contributes to the CPoC aggregation, bringing Kimi's conf_weight share from
+~100% down to **51.3%** in e277 — well below the 75% cap.
+
+---
+
 ## How the Weight Became Unbalanced
 
 ### e265 — first breach, near miss
