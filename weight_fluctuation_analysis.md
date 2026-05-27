@@ -110,22 +110,25 @@ was proportionally larger. This tipped the balance: Kimi conf_weight hit 70.9%
 in e265, triggering the cap for the first time on a significant scale (3 operators
 affected, 30,592 GONKA compensation).
 
-### Phase 5 — The nonce bug collapse and weight inversion (e266→e267)
+### Phase 5 — External attack on vLLM, collapse and weight inversion (e266→e267)
 
-e266 was hit by a separate nonce bug that excluded most Kimi operators, collapsing
-the Kimi presence to 8 participants and 9 nodes. Total network weight crashed to
-335k as the Kimi weight disappeared. This became the **N-1 reference weight** used
-by the cap formula for e267.
+The e266 collapse was not caused by a protocol bug. An unknown external actor
+conducted a targeted attack using malicious requests designed to crash vLLM
+instances running the Kimi model. The attack succeeded in taking down most Kimi
+operators' inference nodes, causing mass exclusion from the epoch. Kimi presence
+collapsed from ~52 nodes to 9, and total network weight crashed from ~1M to 335k.
 
-When Kimi operators returned in e267 — now with 27 participants and **81 nodes**,
-many carrying large accumulated CW — the subgroup's conf_weight was 915k against
-a cap reference of only 335k × 0.75 = 251k. Kimi's weight was **3.6× above the
-cap**, causing the 169.1% conf% figure and 88,917 GONKA in compensation — the
-worst single epoch of the entire incident.
+This destroyed the **N-1 reference weight** used by the cap formula for e267.
 
-The nonce bug collapse in e266, by destroying the N-1 reference weight, directly
-caused the severity of the e267 inversion. Without it, the cap formula would have
-used a ~900k reference and the breach would have been far smaller.
+When Kimi operators came back online in e267 — now with 27 participants and
+**81 nodes**, many carrying large accumulated CW — the subgroup's conf_weight was
+915k against a cap reference of only 335k × 0.75 = 251k. Kimi's weight was
+**3.6× above the cap**, causing the 169.1% conf% figure and 88,917 GONKA in
+compensation — the worst single epoch of the entire incident.
+
+The attack in e266, by destroying the N-1 reference weight, directly amplified
+the severity of the e267 inversion. Without it, the cap formula would have used
+a ~1M reference and the breach would have been far smaller or not triggered at all.
 
 ### Phase 6 — Persistent breach despite partial recovery (e268–e275)
 
@@ -277,3 +280,33 @@ e277  0.512x  |##########  RESOLVED
 
 Issue resolved in e277 following v0.2.13 upgrade (block 4,267,300).
 No further compensation required.
+
+---
+
+## Conclusion: GRC Case Eligibility
+
+**This case should not be treated as a GRC restitution case.**
+
+The ComputeGroupCap breach and the resulting underpayments across e267–e276 were
+a consequence of two compounding factors, neither of which is a protocol bug:
+
+1. **Kimi's original WSF was too high** relative to the network's capacity to
+   absorb it. This is a parameter calibration issue, not a code defect. The fix
+   (lowering WSF to 0.78 in v0.2.13) was a deliberate protocol parameter
+   adjustment, not a bug patch.
+
+2. **The severity of the e267 inversion was caused by an external attack.** An
+   unknown actor deliberately targeted Kimi operators with malicious vLLM requests
+   in e266, crashing their inference nodes and collapsing network weight to 335k.
+   This destroyed the N-1 reference weight and directly caused the worst epoch
+   (e267) of the entire incident. The attack is external to the protocol — the
+   chain behaved correctly given the state it observed.
+
+The compensation already paid (491,482 GONKA across e267–e276) was calculated
+and distributed as a good-faith measure to operators who were underpaid relative
+to their confirmed work under a broken parameter regime. That is distinct from
+GRC restitution, which addresses losses caused by protocol-level bugs.
+
+Opening a GRC case on this incident would set a precedent for compensating
+parameter miscalibration and externally-induced network disruptions — both of
+which are outside the GRC mandate.
