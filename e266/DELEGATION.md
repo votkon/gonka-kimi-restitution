@@ -5,7 +5,11 @@
 An external attack on Kimi vLLM nodes (which began in e265) escalated in epoch 266,
 crashing most operators' inference nodes and causing 9 participants to be completely
 excluded from the epoch group — they submitted Kimi nonces on-chain but their weight
-was never registered. As a result, anyone who had delegated their Kimi consensus weight
+was never registered. The confirmed attack vectors were malicious chat completions
+requests combining `stop_token_ids` with `min_tokens` (triggers a vLLM CUDA assert,
+`EngineDeadError`, ~5 min recovery) and `prompt_logprobs` on long prompts (GPU OOM).
+Both were patched at the devshard gateway on May 16 2026 (PRs #1170, #1171), after
+e266 had already run. As a result, anyone who had delegated their Kimi consensus weight
 to one of those excluded operators was also harmed indirectly via the delegation penalty
 mechanism.
 

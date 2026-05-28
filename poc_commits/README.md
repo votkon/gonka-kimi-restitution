@@ -1,6 +1,6 @@
 # PoC Commits — Epochs 266–269
 
-Raw nonce commit data fetched from the archive node for the restitution case covering epochs 266–270.
+Raw nonce commit data fetched from the archive node for the restitution case covering epochs 266–269.
 Epoch 270 had not started at time of collection (current epoch was 269).
 
 ## Files

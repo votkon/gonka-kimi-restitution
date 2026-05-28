@@ -1,4 +1,19 @@
-# Gonka Network — Epoch 265–276 Restitution Case
+# GRC-GONKA-265: Kimi Restitution, Epochs 265–276
+
+| Field | Value |
+|---|---|
+| **Case** | `GRC-GONKA-265` - Kimi operator restitution: external attack (e265–e266) + ComputeGroupCap underpayment (e267–e276) |
+| Epochs affected | 265–276 |
+| Affected participants | 52 unique addresses |
+| Estimated compensation | 710,772.72 GONKA |
+| **Cause and evidence** | External actor sent malicious requests crashing Kimi vLLM nodes in e265–e266, causing CPoC degradation and mass nonce exclusion; the resulting N-1 weight collapse triggered ComputeGroupCap inversion every epoch through e276. Evidence: [`weight_fluctuation_analysis.md`](weight_fluctuation_analysis.md), per-epoch compensation scripts and JSON in `e265/`–`e276/`. |
+| **Can it happen again?** | ComputeGroupCap: `No known repeat path` — resolved by v0.2.13 WeightScaleFactor adjustment. External vLLM attack: `Reduced risk` — the specific crash vectors (`stop_token_ids`+`min_tokens` OOM, `prompt_logprobs` OOM, JSON schema recursion bomb, Jinja injection via `chat_template_kwargs`) are patched at the devshard gateway (PRs #1170, #1171, #1180, merged May 16–18). A proxy geo-module bug (PR #1183) that made all IP-based rate-limiting ineffective during e265 was also fixed May 18. No known remaining crash path, but gateway coverage of unknown vLLM attack surface cannot be guaranteed. |
+| **Mitigation / fix** | Nonce exclusion bug: fixed before e267 (version unconfirmed). ComputeGroupCap: v0.2.13 at block 4,267,300 (WeightScaleFactor for Kimi reduced to 0.78). External vLLM attack: devshard gateway patches merged May 16–18 2026 — PR #1170 (`stop_token_ids`+`min_tokens` strip, the confirmed e264/e265 attack vector), PR #1171 (`prompt_logprobs` OOM strip), PR #1180 (CVE-class defenses: schema recursion, Jinja injection, body depth pre-scan), PR #1183 (proxy geo-module bug fix — rate-limiting was non-functional during the attack). |
+| **Compensation overlap** | See [`project_preserved_nodes_bug.md`](https://github.com/) — separate VotingPower cap restitution track (e248–e275, 43 addresses); address overlap with this case not yet audited. |
+| **Current decision** | GRC must validate eligibility criteria, confirm no address overlap with the preserved-nodes restitution track, and approve the 710,772.72 GONKA aggregate for distribution. |
+| **Review focus** | Highest risk: e266 nonce reconstruction methodology (18 participants, 183,605 GONKA); confirm reconstructed weights match on-chain nonce commits in `poc_commits/`. Secondary: e276 partial-epoch cutoff at block 4,267,299. |
+
+---
 
 ## Overview
 
@@ -7,9 +22,12 @@ Gonka network. Two distinct bugs caused underpayment to `moonshotai/Kimi-K2.6` o
 across these epochs:
 
 - **Epochs 265–266**: external attack — an unknown actor sent malicious requests targeting
-  Kimi vLLM nodes starting in e265, causing CPoC confirmation weight degradation, and
-  escalating in e266 to crash most operators and cause mass nonce exclusion; delegation
-  compensation included for e266 delegators
+  Kimi vLLM nodes starting in e265 (attack payload confirmed from production logs: `stop_token_ids`
+  + `min_tokens` combination that triggers a vLLM CUDA assert, crashing the engine; 16 crashes
+  across 12/14 mlnodes observed on 2026-05-14), causing CPoC confirmation weight degradation,
+  and escalating in e266 to crash most operators and cause mass nonce exclusion; delegation
+  compensation included for e266 delegators; gateway patches merged May 16–18 (PRs #1170, #1171,
+  #1180, #1183)
 - **Epochs 267–276**: `ComputeGroupCap` underpayment — the e266 collapse destroyed the
   N-1 reference weight used by the cap formula, and when Kimi operators returned in e267
   with full accumulated confirmation weight the mismatch caused a severe inversion;

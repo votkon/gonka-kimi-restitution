@@ -52,8 +52,9 @@ below the 75% threshold. e277 is the first clean epoch.
 | e273  | ComputeGroupCap | 19 | 50,078 | 17.6% |
 | e274  | ComputeGroupCap | 9  | 47,719 | 16.8% |
 | e275  | ComputeGroupCap | 15 | 33,939 | 12.0% |
+| e276  | ComputeGroupCap (partial) | 11 | 55,997 | partial epoch |
 
-**Total ComputeGroupCap restitution (e267–e275): 435,486 GONKA**
+**Total ComputeGroupCap restitution (e267–e276): 491,482 GONKA**
 
 Note: e265 and e266 compensated different bugs. The ComputeGroupCap issue
 begins at e267 — the first epoch where Kimi's weight structurally dominated
@@ -105,18 +106,39 @@ large (~1.0–1.1M total weight) which kept Kimi from going further.
 ### Phase 4 — External attack begins, cap triggers hard (e265)
 
 An unknown external actor conducted a targeted attack using malicious requests designed
-to crash vLLM instances running the Kimi model. The attack first hit in e265: CPoC
-confirmation weights for Kimi participants collapsed abnormally at block 4,103,171,
-reducing 3 operators' rewards significantly (30,592 GONKA compensation). Total network
-weight also dropped from 1.01M to **904k** as Qwen operators churned out around the
-same time, tipping Kimi conf_weight to 70.9% and triggering the cap.
+to crash vLLM instances running the Kimi model. The attack payload has since been
+confirmed from production fleet logs (2026-05-14 17:41–18:05 UTC, epoch 264): a chat
+completions request combining `stop_token_ids` containing out-of-bounds values with
+`min_tokens >= 1` triggers a CUDA assert in vLLM's sampler (`apply_top_k_only`
+performs a `gather` against an out-of-bounds index), killing the engine with
+`EngineDeadError` — 5 min recovery per node. 16 crashes across 12 of 14 mlnodes were
+observed from a single repeated payload signature. A second crash vector was also
+exploited: `prompt_logprobs` on long prompts causes a vocab-sized `all_gather` OOM
+(8 crashes/day on one mlnode, ~40 min downtime/day). A proxy nginx geo-module bug
+(geo variables not expanded per-request) meant IP-based rate-limiting was also
+non-functional during this period — all IPs shared one rate-limit bucket.
+
+The attack first hit in e265: CPoC confirmation weights for Kimi participants collapsed
+abnormally at block 4,103,171, reducing 3 operators' rewards significantly (30,592
+GONKA compensation). Total network weight also dropped from 1.01M to **904k** as Qwen
+operators churned out around the same time, tipping Kimi conf_weight to 70.9% and
+triggering the cap.
+
+Gateway patches were merged May 16–18: PR #1170 strips `min_tokens` when
+`stop_token_ids` is present (the confirmed attack vector); PR #1171 strips
+`prompt_logprobs`; PR #1180 adds CVE-class defenses (JSON schema recursion,
+Jinja injection via `chat_template_kwargs`, body depth pre-scan); PR #1183
+fixes the proxy geo-module bug restoring per-IP rate-limiting.
 
 ### Phase 5 — Attack escalates, network collapse and weight inversion (e266→e267)
 
-The attack continued into e266, this time succeeding in taking down most Kimi operators'
-inference nodes entirely. Kimi presence collapsed from ~52 nodes to 9, and total network
-weight crashed from ~1M to **335k**. This caused mass nonce exclusion and delegation
-penalties (188,698 GONKA compensation).
+The attack continued into e266 before the gateway patches landed (PRs #1170/#1171 merged
+May 16, after e265 had already begun). With the devshard gateway still unpatched and
+IP-based rate-limiting non-functional (proxy geo-module bug, fixed PR #1183 May 18),
+the attacker succeeded in taking down most Kimi operators' inference nodes entirely.
+Kimi presence collapsed from ~52 nodes to 9, and total network weight crashed from ~1M
+to **335k**. This caused mass nonce exclusion and delegation penalties (188,698 GONKA
+compensation).
 
 The collapse destroyed the **N-1 reference weight** used by the cap formula for e267.
 
@@ -300,7 +322,14 @@ a consequence of two compounding factors, neither of which is a protocol bug:
    starting in e265, escalating in e266 to crash most inference nodes and collapse
    network weight to 335k. This destroyed the N-1 reference weight and directly
    caused the worst epoch (e267) of the entire incident. The attack is external to
-   the protocol — the chain behaved correctly given the state it observed.
+   the protocol — the chain behaved correctly given the state it observed. The
+   specific crash vectors (confirmed from production logs) were: (a) `stop_token_ids`
+   + `min_tokens` causing a vLLM CUDA assert (`EngineDeadError`, ~5 min recovery),
+   and (b) `prompt_logprobs` on long prompts causing GPU OOM via vocab-sized
+   `all_gather`. Both were patched at the devshard gateway (PRs #1170, #1171, May 16)
+   along with broader CVE-class hardening (PR #1180, May 18) and a proxy rate-limiting
+   bug fix (PR #1183, May 18) that had left all IPs sharing a single rate-limit bucket
+   during the attack window.
 
 The calculated shortfall (491,482 GONKA across e267–e276) represents the
 difference between what operators should have received under correct parameters
