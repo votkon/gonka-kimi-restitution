@@ -4,13 +4,13 @@
 |---|---|
 | **Case** | `GRC-GONKA-265` - Kimi operator restitution: external attack (e265–e266) + ComputeGroupCap underpayment (e267–e276) |
 | Epochs affected | 265–276 |
-| Affected participants | 52 unique addresses |
-| Estimated compensation | 710,772.72 GONKA |
+| Affected participants | 53 unique addresses |
+| Estimated compensation | 946,509.93 GONKA |
 | **Cause and evidence** | External actor sent malicious requests crashing Kimi vLLM nodes in e265–e266, causing CPoC degradation and mass nonce exclusion; the resulting N-1 weight collapse triggered ComputeGroupCap inversion every epoch through e276. Evidence: [`weight_fluctuation_analysis.md`](weight_fluctuation_analysis.md), per-epoch compensation scripts and JSON in `e265/`–`e276/`. |
 | **Can it happen again?** | ComputeGroupCap: `No known repeat path` — resolved by v0.2.13 WeightScaleFactor adjustment. External vLLM attack: `Reduced risk` — the specific crash vectors (`stop_token_ids`+`min_tokens` OOM, `prompt_logprobs` OOM, JSON schema recursion bomb, Jinja injection via `chat_template_kwargs`) are patched at the devshard gateway (PRs #1170, #1171, #1180, merged May 16–18). A proxy geo-module bug (PR #1183) that made all IP-based rate-limiting ineffective during e265 was also fixed May 18. No known remaining crash path, but gateway coverage of unknown vLLM attack surface cannot be guaranteed. |
 | **Mitigation / fix** | Nonce exclusion bug: fixed before e267 (version unconfirmed). ComputeGroupCap: v0.2.13 at block 4,267,300 (WeightScaleFactor for Kimi reduced to 0.78). External vLLM attack: devshard gateway patches merged May 16–18 2026 — PR #1170 (`stop_token_ids`+`min_tokens` strip, the confirmed e264/e265 attack vector), PR #1171 (`prompt_logprobs` OOM strip), PR #1180 (CVE-class defenses: schema recursion, Jinja injection, body depth pre-scan), PR #1183 (proxy geo-module bug fix — rate-limiting was non-functional during the attack). |
 | **Compensation overlap** | Requires investigation — potential address overlap with separate restitution tracks not yet audited. |
-| **Current decision** | GRC must validate eligibility criteria, confirm no address overlap with the preserved-nodes restitution track, and approve the 710,772.72 GONKA aggregate for distribution. |
+| **Current decision** | GRC voted to exclude this case from proposal #4 (6 exclude, 2 include, 1 abstain). Calculations are published here for community reference if anyone chooses to bring this forward independently. |
 | **Review focus** | Highest risk: e266 nonce reconstruction methodology (18 participants, 183,605 GONKA); confirm reconstructed weights match on-chain nonce commits in `poc_commits/`. Secondary: e276 partial-epoch cutoff at block 4,267,299. |
 
 ---
@@ -224,8 +224,8 @@ worst inversion of the entire incident (conf/weight ratio 1.75×).
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 27 |
-| Affected participants | 21 |
-| Total compensation | **88,917.16 GONKA** |
+| Affected participants | 25 |
+| Total compensation | **246,471.82 GONKA** |
 
 Output: [`e267/compensation_267.csv`](e267/compensation_267.csv) · [`e267/compensation_267.json`](e267/compensation_267.json)
 
@@ -240,7 +240,7 @@ above cap at 85.2% of total network weight. Conf/weight ratio 0.85×.
 |--------|-------|
 | Kimi participants in epoch | 20 |
 | Affected participants | 11 |
-| Total compensation | **65,241.37 GONKA** |
+| Total compensation | **42,634.68 GONKA** |
 
 Output: [`e268/compensation_268.csv`](e268/compensation_268.csv) · [`e268/compensation_268.json`](e268/compensation_268.json)
 
@@ -254,7 +254,7 @@ Kimi conf_weight at 87.6% of total network weight. Conf/weight ratio ~1.00×.
 |--------|-------|
 | Kimi participants in epoch | 30 |
 | Affected participants | 19 |
-| Total compensation | **48,012.52 GONKA** |
+| Total compensation | **47,504.58 GONKA** |
 
 Output: [`e269/compensation_269.csv`](e269/compensation_269.csv) · [`e269/compensation_269.json`](e269/compensation_269.json)
 
@@ -267,8 +267,8 @@ Kimi conf_weight at 94.9% of total network weight. Conf/weight ratio 1.23×.
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 23 |
-| Affected participants | 16 |
-| Total compensation | **30,965.83 GONKA** |
+| Affected participants | 19 |
+| Total compensation | **76,870.08 GONKA** |
 
 Output: [`e270/compensation_270.csv`](e270/compensation_270.csv) · [`e270/compensation_270.json`](e270/compensation_270.json)
 
@@ -282,7 +282,7 @@ Kimi conf_weight at 80.5% of total network weight. Conf/weight ratio 0.95×.
 |--------|-------|
 | Kimi participants in epoch | 23 |
 | Affected participants | 17 |
-| Total compensation | **38,178.79 GONKA** |
+| Total compensation | **28,422.15 GONKA** |
 
 Output: [`e271/compensation_271.csv`](e271/compensation_271.csv) · [`e271/compensation_271.json`](e271/compensation_271.json)
 
@@ -296,7 +296,7 @@ Kimi conf_weight at 80.0% of total network weight. Conf/weight ratio 0.88×.
 |--------|-------|
 | Kimi participants in epoch | 23 |
 | Affected participants | 11 |
-| Total compensation | **32,434.44 GONKA** |
+| Total compensation | **16,988.15 GONKA** |
 
 Output: [`e272/compensation_272.csv`](e272/compensation_272.csv) · [`e272/compensation_272.json`](e272/compensation_272.json)
 
@@ -310,8 +310,8 @@ of total network weight — a second inversion. Conf/weight ratio 1.18×.
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 30 |
-| Affected participants | 19 |
-| Total compensation | **50,077.52 GONKA** |
+| Affected participants | 20 |
+| Total compensation | **86,243.30 GONKA** |
 
 Output: [`e273/compensation_273.csv`](e273/compensation_273.csv) · [`e273/compensation_273.json`](e273/compensation_273.json)
 
@@ -325,7 +325,7 @@ Kimi conf_weight at 88.5% of total network weight. Conf/weight ratio 0.97×.
 |--------|-------|
 | Kimi participants in epoch | 24 |
 | Affected participants | 9 |
-| Total compensation | **47,718.95 GONKA** |
+| Total compensation | **41,818.44 GONKA** |
 
 Output: [`e274/compensation_274.csv`](e274/compensation_274.csv) · [`e274/compensation_274.json`](e274/compensation_274.json)
 
@@ -338,25 +338,24 @@ Kimi conf_weight at 103.6% of total network weight. Conf/weight ratio 1.28×.
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 24 |
-| Affected participants | 15 |
-| Total compensation | **33,938.75 GONKA** |
+| Affected participants | 18 |
+| Total compensation | **89,984.78 GONKA** |
 
 Output: [`e275/compensation_275.csv`](e275/compensation_275.csv) · [`e275/compensation_275.json`](e275/compensation_275.json)
 
 ---
 
-## Epoch 276 — ComputeGroupCap (partial epoch)
+## Epoch 276 — ComputeGroupCap
 
-v0.2.13 activated at block **4,267,300** (mid-epoch), which reduced Kimi's
-WeightScaleFactor to 0.78 and ended the cap breach. Compensation is calculated against
-group state at block **4,267,299** (the last pre-upgrade block). Kimi conf_weight was
-at 101.8% of total network weight in the pre-upgrade portion.
+v0.2.13 activated at block **4,267,300** (mid-epoch), reducing Kimi's WeightScaleFactor
+to 0.78. Compensation is calculated against the full epoch end state (block **4,279,520**)
+using the post-upgrade weights and rewards as recorded by the chain.
 
 | Metric | Value |
 |--------|-------|
 | Kimi participants in epoch | 23 |
 | Affected participants | 11 |
-| Total compensation | **55,996.81 GONKA** |
+| Total compensation | **50,281.35 GONKA** |
 
 Output: [`e276/compensation_276.csv`](e276/compensation_276.csv) · [`e276/compensation_276.json`](e276/compensation_276.json)
 
@@ -368,17 +367,17 @@ Output: [`e276/compensation_276.csv`](e276/compensation_276.csv) · [`e276/compe
 |-------|-------|---------|---------------------|
 | 265 | CPoC degradation | 3 | 30,592.10 |
 | 266 | Nonce exclusion + delegation | 18 + 9 | 188,698.47 |
-| 267 | ComputeGroupCap | 21 | 88,917.16 |
-| 268 | ComputeGroupCap | 11 | 65,241.37 |
-| 269 | ComputeGroupCap | 19 | 48,012.52 |
-| 270 | ComputeGroupCap | 16 | 30,965.83 |
-| 271 | ComputeGroupCap | 17 | 38,178.79 |
-| 272 | ComputeGroupCap | 11 | 32,434.44 |
-| 273 | ComputeGroupCap | 19 | 50,077.52 |
-| 274 | ComputeGroupCap | 9 | 47,718.95 |
-| 275 | ComputeGroupCap | 15 | 33,938.75 |
-| 276 | ComputeGroupCap (partial) | 11 | 55,996.81 |
-| **TOTAL** | | **52 unique addresses** | **710,772.72 GONKA** |
+| 267 | ComputeGroupCap | 25 | 246,471.82 |
+| 268 | ComputeGroupCap | 11 | 42,634.68 |
+| 269 | ComputeGroupCap | 19 | 47,504.58 |
+| 270 | ComputeGroupCap | 19 | 76,870.08 |
+| 271 | ComputeGroupCap | 17 | 28,422.15 |
+| 272 | ComputeGroupCap | 11 | 16,988.15 |
+| 273 | ComputeGroupCap | 20 | 86,243.30 |
+| 274 | ComputeGroupCap | 9 | 41,818.44 |
+| 275 | ComputeGroupCap | 18 | 89,984.78 |
+| 276 | ComputeGroupCap | 11 | 50,281.35 |
+| **TOTAL** | | **53 unique addresses** | **946,509.93 GONKA** |
 
 Per-address breakdown: [`aggregate_compensation.json`](aggregate_compensation.json) · [`aggregate_compensation.csv`](aggregate_compensation.csv)
 

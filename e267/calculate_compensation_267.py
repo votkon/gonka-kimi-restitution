@@ -105,8 +105,9 @@ def fetch_group_data():
     with open(os.path.join(HERE, f"epoch{EPOCH}_group_data.json"), "w") as f:
         json.dump(d, f, indent=2)
     vw = d["epoch_group_data"]["validation_weights"]
-    print(f"  -> {len(vw)} members")
-    return vw
+    root_total_weight = int(d["epoch_group_data"].get("total_weight") or 0)
+    print(f"  -> {len(vw)} members, root total_weight={root_total_weight:,}")
+    return vw, root_total_weight
 
 
 def fetch_performance(addresses):
@@ -131,13 +132,11 @@ def main():
     print("Fetching data from chain...")
 
     kimi_addrs  = fetch_commits()
-    vw          = fetch_group_data()
+    vw, root_total_weight = fetch_group_data()
     addresses   = [x["member_address"] for x in vw]
     performance = fetch_performance(addresses)
     print()
 
-    # Kimi contributors are the only eligible compensees, but the denominator
-    # uses all participants — the pool is shared across the whole epoch
     kimi_vw      = [x for x in vw if x["member_address"] in kimi_addrs]
     total_conf_w = sum(int(x.get("confirmation_weight", 0)) for x in vw if "confirmation_weight" in x)
     total_weight = sum(int(x.get("weight", 0)) for x in vw)
@@ -160,6 +159,7 @@ def main():
     print(f"Kimi participants in epoch group       : {len(kimi_vw)}")
     print(f"Total ValidationWeight.weight          : {total_weight:,}")
     print(f"Total confirmation_weight (all)        : {total_conf_w:,}")
+    print(f"Root total_weight (reward denominator) : {root_total_weight:,}")
     if total_weight > 0:
         print(f"Ratio (conf/weight)                    : {total_conf_w/total_weight:.2f}x")
     print()
@@ -167,15 +167,14 @@ def main():
     results = []
     for x in kimi_vw:
         addr   = x["member_address"]
-        cw     = int(x.get("confirmation_weight", 0)) if "confirmation_weight" in x else 0
         w      = int(x.get("weight", 0))
+        cw     = int(x.get("confirmation_weight", 0)) if "confirmation_weight" in x else 0
         actual = performance.get(addr, 0)
 
-        # Only compensate healthy participants: must have confirmed work AND received rewards
-        if cw == 0 or total_conf_w == 0 or actual == 0:
+        if cw == 0 or root_total_weight == 0 or actual == 0:
             continue
 
-        correct      = cw / total_conf_w * epoch_theoretical_reward
+        correct      = cw / root_total_weight * epoch_theoretical_reward
         compensation = max(0.0, correct - actual)
 
         if compensation > 0:
@@ -232,9 +231,8 @@ def main():
             "epoch_theoretical_reward_gonka":  epoch_theoretical_reward / 1e9,
             "total_validation_weight":         total_weight,
             "total_confirmation_weight":       total_conf_w,
-            "cap_factor":                      0.75,
-            "n1_total_weight":                 335159,
-            "kimi_group_cap":                  251369,
+            "root_total_weight":               root_total_weight,
+            "denominator_mode":                "root_total_weight",
             "affected_participants":           len(results),
             "total_compensation_ngonka":       total_comp,
             "total_compensation_gonka":        total_comp / 1e9,

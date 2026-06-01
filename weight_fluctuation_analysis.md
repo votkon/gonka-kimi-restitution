@@ -43,18 +43,18 @@ below the 75% threshold. e277 is the first clean epoch.
 |-------|-----------|---------|---------------------|-------------------|
 | e265  | CPoC bug (separate) | 3 | 30,592 | 10.7% |
 | e266  | Nonce bug (separate) | 18 operators + 9 delegators | 188,698 | 66.3% |
-| e267  | ComputeGroupCap | 21 | 88,917 | 31.2% |
-| e268  | ComputeGroupCap | 11 | 65,241 | 22.9% |
-| e269  | ComputeGroupCap | 19 | 48,013 | 16.9% |
-| e270  | ComputeGroupCap | 16 | 30,966 | 10.9% |
-| e271  | ComputeGroupCap | 17 | 38,179 | 13.4% |
-| e272  | ComputeGroupCap | 11 | 32,434 | 11.4% |
-| e273  | ComputeGroupCap | 19 | 50,078 | 17.6% |
-| e274  | ComputeGroupCap | 9  | 47,719 | 16.8% |
-| e275  | ComputeGroupCap | 15 | 33,939 | 12.0% |
-| e276  | ComputeGroupCap (partial) | 11 | 55,997 | partial epoch |
+| e267  | ComputeGroupCap | 25 | 246,472 | 86.6% |
+| e268  | ComputeGroupCap | 11 | 42,635 | 15.0% |
+| e269  | ComputeGroupCap | 19 | 47,505 | 16.7% |
+| e270  | ComputeGroupCap | 19 | 76,870 | 27.0% |
+| e271  | ComputeGroupCap | 17 | 28,422 | 10.0% |
+| e272  | ComputeGroupCap | 11 | 16,988 | 6.0% |
+| e273  | ComputeGroupCap | 20 | 86,243 | 30.4% |
+| e274  | ComputeGroupCap | 9  | 41,818 | 14.7% |
+| e275  | ComputeGroupCap | 18 | 89,985 | 31.7% |
+| e276  | ComputeGroupCap | 11 | 50,281 | 17.7% |
 
-**Total ComputeGroupCap restitution (e267–e276): 491,482 GONKA**
+**Total ComputeGroupCap restitution (e267–e276): 727,219 GONKA**
 
 Note: e265 and e266 compensated different bugs. The ComputeGroupCap issue
 begins at e267 — the first epoch where Kimi's weight structurally dominated
@@ -145,7 +145,7 @@ The collapse destroyed the **N-1 reference weight** used by the cap formula for 
 When Kimi operators came back online in e267 — now with 27 participants and
 **81 nodes**, many carrying large accumulated CW — the subgroup's conf_weight was
 915k against a cap reference of only 335k × 0.75 = 251k. Kimi's weight was
-**3.6× above the cap**, causing the 169.1% conf% figure and 88,917 GONKA in
+**3.6× above the cap**, causing the 169.1% conf% figure and 246,472 GONKA in
 compensation — the worst single epoch of the entire incident.
 
 The attack across e265–e266, by destroying the N-1 reference weight, directly amplified
@@ -190,7 +190,7 @@ With Kimi operators returning after the e266 nonce fix, Kimi val_weight
 jumped to 658k — **121.7% of total network weight of 541k**. This is a
 weight inversion: the Kimi subgroup alone outweighed the entire reported
 network total. Kimi conf_weight hit 169.1% of total. The cap triggered hard,
-causing 88,917 GONKA in compensation — the largest single-epoch payout.
+causing 246,472 GONKA in compensation — the largest single-epoch payout.
 
 The inversion occurred because the N-1 total weight used by the cap formula
 referenced e266's collapsed network (335k) while e267 had recovered to a much
@@ -200,7 +200,7 @@ larger Kimi cohort. This lag in the reference weight amplified the breach.
 
 Total network weight recovered to 698k as more Qwen participants joined.
 Kimi conf_weight fell to 85.2% of total — still above cap but improving.
-Compensation dropped to 65,241 GONKA.
+Compensation dropped to 42,635 GONKA.
 
 ### e269–e272 — stabilisation attempt
 
@@ -288,17 +288,17 @@ e277  0.512x  |##########  RESOLVED
 
 | Epoch | Affected | Compensation (GONKA) | Notes |
 |-------|---------|---------------------|-------|
-| e267  | 21      | 88,917.16           | weight inversion, worst epoch |
-| e268  | 11      | 65,241.37           | |
-| e269  | 19      | 48,012.52           | |
-| e270  | 16      | 30,965.83           | |
-| e271  | 17      | 38,178.79           | |
-| e272  | 11      | 32,434.44           | |
-| e273  | 19      | 50,077.52           | second inversion |
-| e274  | 9       | 47,718.95           | |
-| e275  | 15      | 33,938.75           | |
-| e276  | 11      | 55,996.81           | partial — pre-upgrade only |
-| **TOTAL** | | **491,482.15 GONKA** | |
+| e267  | 25      | 246,471.82          | weight inversion, worst epoch |
+| e268  | 11      | 42,634.68           | |
+| e269  | 19      | 47,504.58           | |
+| e270  | 19      | 76,870.08           | |
+| e271  | 17      | 28,422.15           | |
+| e272  | 11      | 16,988.15           | |
+| e273  | 20      | 86,243.30           | second inversion |
+| e274  | 9       | 41,818.44           | |
+| e275  | 18      | 89,984.78           | |
+| e276  | 11      | 50,281.35           | queried at true epoch end (block 4,279,520) |
+| **TOTAL** | | **727,219.37 GONKA** | |
 
 Issue resolved in e277 following v0.2.13 upgrade (block 4,267,300).
 No further compensation required.
@@ -331,7 +331,7 @@ a consequence of two compounding factors, neither of which is a protocol bug:
    bug fix (PR #1183, May 18) that had left all IPs sharing a single rate-limit bucket
    during the attack window.
 
-The calculated shortfall (491,482 GONKA across e267–e276) represents the
+The calculated shortfall (727,219 GONKA across e267–e276) represents the
 difference between what operators should have received under correct parameters
 and what the chain actually paid. No compensation has been distributed yet.
 

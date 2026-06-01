@@ -4,6 +4,7 @@
     "epoch_group_id": "1066",
     "epoch_policy": "gonka1kca9rdgf7yew8cjcakvadc4nyz9kvsnmt83xdm74ujsnsc0ycfmqntvan9",
     "effective_block_height": "4259671",
+    "last_block_height": "4275061",
     "member_seed_signatures": [
       {
         "member_address": "gonka10079cnl3nuh2k82mhkm04dj0slhtw9kmjewwau",
@@ -227,13 +228,13 @@
         "member_address": "gonka10079cnl3nuh2k82mhkm04dj0slhtw9kmjewwau",
         "weight": "35561",
         "reputation": 25,
-        "confirmation_weight": "45840"
+        "confirmation_weight": "30947"
       },
       {
         "member_address": "gonka10mmdjau4dnj8krs7sh7t7635ttnmq9u3vqgz09",
         "weight": "48865",
         "reputation": 100,
-        "confirmation_weight": "65994"
+        "confirmation_weight": "18447"
       },
       {
         "member_address": "gonka12pcu9mcrpa4w4sjd9y3dsksnvu495ss6f9r4ra",
@@ -251,7 +252,7 @@
         "member_address": "gonka14ljarev2nlzu4ej50vx7ylj2rvg4n20fnq2ysc",
         "weight": "10855",
         "reputation": 100,
-        "confirmation_weight": "16651"
+        "confirmation_weight": "16323"
       },
       {
         "member_address": "gonka15p7s7w2hx0y8095lddd4ummm2y0kwpwljk00aq",
@@ -263,13 +264,12 @@
         "member_address": "gonka168rtjfkszuhcggg4dfyse4yh7xn9zwfglnkns2",
         "weight": "10801",
         "reputation": 100,
-        "confirmation_weight": "15129"
+        "confirmation_weight": "14988"
       },
       {
         "member_address": "gonka17pw6099q758qwzewtrqmqpf5c2lrhr97fwqexu",
         "weight": "3315",
-        "reputation": 100,
-        "confirmation_weight": "3801"
+        "reputation": 100
       },
       {
         "member_address": "gonka19ghzvgfr065s3fr5awuvs3nhy9fq4n7wrr9kel",
@@ -280,19 +280,17 @@
       {
         "member_address": "gonka1amlmhjym02shahjv8ldmupg4cx0qc66q6f85rj",
         "weight": "761",
-        "reputation": 100,
-        "confirmation_weight": "895"
+        "reputation": 100
       },
       {
         "member_address": "gonka1ce02jjduga8jvwj8jx39mxn0jr345vgkx7lk2n",
         "weight": "4891",
-        "confirmation_weight": "7503"
+        "confirmation_weight": "7462"
       },
       {
         "member_address": "gonka1d694r00czmq75txghwjcuk07lxvc8d4ekgsha0",
         "weight": "451",
-        "reputation": 100,
-        "confirmation_weight": "466"
+        "reputation": 100
       },
       {
         "member_address": "gonka1d7p03cu2y2yt3vytq9wlfm6tlz0lfhlgv9h82p",
@@ -316,7 +314,7 @@
         "member_address": "gonka1gvrrhjmy4w4mayvs2s5l23edj8ertcmtd2v4zr",
         "weight": "44453",
         "reputation": 26,
-        "confirmation_weight": "61659"
+        "confirmation_weight": "47698"
       },
       {
         "member_address": "gonka1p2lhgng7tcqju7emk989s5fpdr7k2c3ek6h26m",
@@ -369,7 +367,7 @@
         "member_address": "gonka1zktn8j65wlys8a8e38hqhf4y3x6m4x04zskkrx",
         "weight": "8059",
         "reputation": 100,
-        "confirmation_weight": "8301"
+        "confirmation_weight": "5921"
       },
       {
         "member_address": "gonka125n6kr5gvdup0lndfkps7t6rd6592panhrg3np",
@@ -406,19 +404,18 @@
         "member_address": "gonka1duuaqdx06sx8v2dzggltwwmqyuw8lvjkjq7xll",
         "weight": "123708",
         "reputation": 86,
-        "confirmation_weight": "129237"
+        "confirmation_weight": "128573"
       },
       {
         "member_address": "gonka1fvly5jrewyjmjfgwah3khy9rttq4cqajcesv9p",
         "weight": "328",
         "reputation": 17,
-        "confirmation_weight": "168"
+        "confirmation_weight": "165"
       },
       {
         "member_address": "gonka1gyk0aahvr3qeju4zx0nplfreej6cy4jjk8svc5",
         "weight": "328",
-        "reputation": 100,
-        "confirmation_weight": "345"
+        "reputation": 100
       },
       {
         "member_address": "gonka1hwvel7n3zuk6wruefuzc356l9myske9stckwnz",
@@ -429,7 +426,7 @@
       {
         "member_address": "gonka1kx9mca3xm8u8ypzfuhmxey66u0ufxhs7nm6wc5",
         "weight": "4317",
-        "confirmation_weight": "5315"
+        "confirmation_weight": "5270"
       },
       {
         "member_address": "gonka1l8jd2nz92mnem0xwgwkltcw2952cnlphs5arsa",
@@ -439,8 +436,7 @@
       {
         "member_address": "gonka1mmlyd5xxu5l68yx8wzclrkxkxvm88mhq5tp5s0",
         "weight": "9504",
-        "reputation": 36,
-        "confirmation_weight": "14579"
+        "reputation": 36
       },
       {
         "member_address": "gonka1myu058axjs62mc3e7na9krwvqpfl9z3gtcw9es",
@@ -481,13 +477,13 @@
         "member_address": "gonka1rcpc45n6zch9qlkn4m3cwngekad89xu8mcr09v",
         "weight": "4159",
         "reputation": 100,
-        "confirmation_weight": "4844"
+        "confirmation_weight": "4832"
       },
       {
         "member_address": "gonka1scskt6wpnjnumsah6kjphmdu87vjgvcxmn4rxv",
         "weight": "22179",
         "reputation": 3,
-        "confirmation_weight": "31283"
+        "confirmation_weight": "17521"
       },
       {
         "member_address": "gonka1tlvg4kjx7ljd5thgd5fkgh39q6lu8cmxupktgg",
@@ -498,8 +494,7 @@
       {
         "member_address": "gonka1u4zxypjgcr8khlzefwjr0vwdaj2uzruw2cehj3",
         "weight": "873",
-        "reputation": 100,
-        "confirmation_weight": "1014"
+        "reputation": 100
       },
       {
         "member_address": "gonka1uf5cg7ef0ns6877nl27y0s6rt06cdmn40k5a88",
@@ -516,8 +511,7 @@
       {
         "member_address": "gonka1ujnc662v6g69jm6fgxnr79a2m7ehzeut059239",
         "weight": "28493",
-        "reputation": 100,
-        "confirmation_weight": "16135"
+        "reputation": 100
       },
       {
         "member_address": "gonka1wt8sr9jxzpec65j7zkxsgh6edk3m6r8nlf5za4",
@@ -528,7 +522,7 @@
       {
         "member_address": "gonka1yal0ysgzc860zt3y8cds8656tnueusgymftvkw",
         "weight": "9551",
-        "confirmation_weight": "14650"
+        "confirmation_weight": "14448"
       },
       {
         "member_address": "gonka1ym3np7guxart483yfdxnlztuazx22cjt0e4a2p",
