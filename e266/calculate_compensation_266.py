@@ -187,20 +187,15 @@ def main():
 
     total_reconstructed_weight = sum(reconstructed.values())
 
-    excluded_nonce = [addr for addr, rec_weight in reconstructed.items()
-                      if performance.get(addr, 0) == 0]
-    if excluded_nonce:
-        print(f"  Participants excluded from nonce compensation (received no rewards):")
-        for a in sorted(excluded_nonce):
-            print(f"    {a}")
-        print()
-
     nonce_results = []
     for addr, rec_weight in reconstructed.items():
         actual = performance.get(addr, 0)
-        # Only compensate healthy participants: must have received actual rewards
-        if actual == 0:
-            continue
+        # Unlike e267–e276 (ComputeGroupCap), zero-reward participants are NOT excluded
+        # here. In e266 the attack was still active and unpatched (gateway patches landed
+        # May 16–18, after e266 ran). An operator with zero rewards was excluded from the
+        # epoch precisely because the attack crashed their vLLM node — zero rewards is
+        # evidence of victimisation, not failure. Excluding them would make compensation
+        # circular: attacked → got zero → excluded from compensation.
         fair_share   = rec_weight / total_reconstructed_weight * epoch_theoretical_reward
         compensation = max(0.0, fair_share - actual)
         if compensation > 0:
@@ -218,7 +213,6 @@ def main():
     nonce_results.sort(key=lambda x: x["compensation_ngonka"], reverse=True)
     total_nonce_comp = sum(r["compensation_ngonka"] for r in nonce_results)
     print(f"  Reconstructed total weight : {total_reconstructed_weight:,.2f}")
-    print(f"  Excluded (no rewards)      : {len(excluded_nonce)}")
     print(f"  Affected participants      : {len(nonce_results)}")
     print(f"  Total compensation        : {total_nonce_comp / 1e9:,.4f} GONKA\n")
 

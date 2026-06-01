@@ -11,9 +11,10 @@
   "delegation_params": {
     "no_participation_penalty": 0.15,
     "delegation_share": 0.05,
-    "net_extra_penalty": 0.09999999999999999,
+    "net_extra_penalty": 0.1,
     "snapshot_height": 4104861
   },
+  "eligibility_note": "Unlike e267-e276, zero-reward nonce submitters are included. In e266 the attack was still active and unpatched \u2014 zero rewards is evidence of being attacked out of the epoch, not of failure.",
   "excluded_operators": [
     "gonka125n6kr5gvdup0lndfkps7t6rd6592panhrg3np",
     "gonka18xeqnspxpg2vncufnjne485rkaagwvz7whyn0d",
@@ -226,7 +227,7 @@
         "actual_rewards_ngonka": 15325866743189,
         "actual_rewards_gonka": 15325.866743189,
         "compensation_ngonka": 1805142497891,
-        "compensation_gonka": 1805.1424978916093
+        "compensation_gonka": 1805.1424978916098
       },
       {
         "address": "gonka1hwvel7n3zuk6wruefuzc356l9myske9stckwnz",
@@ -237,7 +238,7 @@
         "actual_rewards_ngonka": 13391864042618,
         "actual_rewards_gonka": 13391.864042618,
         "compensation_ngonka": 1575513416778,
-        "compensation_gonka": 1575.5134167786323
+        "compensation_gonka": 1575.5134167786325
       },
       {
         "address": "gonka12pcu9mcrpa4w4sjd9y3dsksnvu495ss6f9r4ra",
@@ -248,7 +249,7 @@
         "actual_rewards_ngonka": 7997729972660,
         "actual_rewards_gonka": 7997.72997266,
         "compensation_ngonka": 1166439755518,
-        "compensation_gonka": 1166.439755518597
+        "compensation_gonka": 1166.4397555185972
       },
       {
         "address": "gonka1tlvg4kjx7ljd5thgd5fkgh39q6lu8cmxupktgg",
@@ -281,7 +282,7 @@
         "actual_rewards_ngonka": 863333367214,
         "actual_rewards_gonka": 863.333367214,
         "compensation_ngonka": 108366531966,
-        "compensation_gonka": 108.36653196624604
+        "compensation_gonka": 108.36653196624606
       },
       {
         "address": "gonka1tmk2tzdneht6smu34pkmqdvu7p34qavvmwtwq2",
@@ -292,7 +293,7 @@
         "actual_rewards_ngonka": 843789403192,
         "actual_rewards_gonka": 843.789403192,
         "compensation_ngonka": 100568940182,
-        "compensation_gonka": 100.56894018269698
+        "compensation_gonka": 100.56894018269699
       },
       {
         "address": "gonka1gyk0aahvr3qeju4zx0nplfreej6cy4jjk8svc5",
@@ -314,7 +315,7 @@
         "actual_rewards_ngonka": 0,
         "actual_rewards_gonka": 0.0,
         "compensation_ngonka": 15595183567,
-        "compensation_gonka": 15.595183567098141
+        "compensation_gonka": 15.595183567098145
       }
     ]
   },
