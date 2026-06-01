@@ -54,7 +54,7 @@ below the 75% threshold. e277 is the first clean epoch.
 | e275  | ComputeGroupCap | 18 | 89,985 | 31.7% |
 | e276  | ComputeGroupCap | 11 | 50,281 | 17.7% |
 
-**Total ComputeGroupCap restitution (e267–e276): 727,219 GONKA**
+**Total ComputeGroupCap restitution (e267–e276): 727,219.35 GONKA**
 
 Note: e265 and e266 compensated different bugs. The ComputeGroupCap issue
 begins at e267 — the first epoch where Kimi's weight structurally dominated
@@ -217,7 +217,7 @@ temporarily reducing Kimi's effective weight.
 
 Kimi node count jumped from 65 to 81 (30 participants). Kimi conf_weight
 reached 107.5% of total — a second inversion. Total network weight had dipped
-back to 758k as some Qwen operators churned out. Compensation spiked to 50,078 GONKA.
+back to 758k as some Qwen operators churned out. Compensation spiked to 86,243 GONKA.
 
 ### e274–e275 — worsening trend
 
@@ -226,13 +226,13 @@ Despite Kimi node count returning to ~73–80, Kimi conf_weight remained above
 yet at 1.284x. The trend shows Kimi's per-node confirmation weight was growing
 faster than Qwen network capacity was being added.
 
-### e276 — final affected epoch, partial
+### e276 — final affected epoch
 
-v0.2.13 activated at block 4,267,300 (mid-epoch 276). For the pre-upgrade
-portion of the epoch, Kimi conf_weight was at 101.8% of total (ratio 1.060),
-cap still breached. Compensation is calculated against group data at block
-4,267,299. After the upgrade Kimi WSF dropped to 0.78, bringing the ratio
-below 0.75 for the remainder of the epoch and all subsequent epochs.
+v0.2.13 activated at block 4,267,300 (mid-epoch 276). Kimi conf_weight was at
+101.8% of total (ratio 1.060) — cap still breached. Compensation is calculated
+using group data queried at the true epoch end (block 4,279,520), matching what
+the chain used for reward distribution. After the upgrade Kimi WSF dropped to
+0.78, bringing the ratio below 0.75 for all subsequent epochs.
 
 ### e277 — resolved
 
@@ -298,7 +298,7 @@ e277  0.512x  |##########  RESOLVED
 | e274  | 9       | 41,818.44           | |
 | e275  | 18      | 89,984.78           | |
 | e276  | 11      | 50,281.35           | queried at true epoch end (block 4,279,520) |
-| **TOTAL** | | **727,219.37 GONKA** | |
+| **TOTAL** | | **727,219.35 GONKA** | |
 
 Issue resolved in e277 following v0.2.13 upgrade (block 4,267,300).
 No further compensation required.
@@ -331,7 +331,7 @@ a consequence of two compounding factors, neither of which is a protocol bug:
    bug fix (PR #1183, May 18) that had left all IPs sharing a single rate-limit bucket
    during the attack window.
 
-The calculated shortfall (727,219 GONKA across e267–e276) represents the
+The calculated shortfall (727,219.35 GONKA across e267–e276) represents the
 difference between what operators should have received under correct parameters
 and what the chain actually paid. No compensation has been distributed yet.
 

@@ -26,7 +26,7 @@ Compensation methodology:
   Use confirmation_weight as the authoritative measure of each participant's actual
   confirmed work. The correct reward each participant should have received is:
 
-    correct_reward = confirmation_weight_i / root_total_weight * epoch_reward
+    correct_reward = confirmation_weight_i / EpochGroupData.total_weight * epoch_reward
 
   Compensation = max(0, correct_reward - actual_rewards_received)
 

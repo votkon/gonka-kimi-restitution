@@ -11,7 +11,7 @@
 | **Mitigation / fix** | Nonce exclusion bug: fixed before e267 (version unconfirmed). ComputeGroupCap: v0.2.13 at block 4,267,300 (WeightScaleFactor for Kimi reduced to 0.78). External vLLM attack: devshard gateway patches merged May 16–18 2026 — PR #1170 (`stop_token_ids`+`min_tokens` strip, the confirmed e264/e265 attack vector), PR #1171 (`prompt_logprobs` OOM strip), PR #1180 (CVE-class defenses: schema recursion, Jinja injection, body depth pre-scan), PR #1183 (proxy geo-module bug fix — rate-limiting was non-functional during the attack). |
 | **Compensation overlap** | Requires investigation — potential address overlap with separate restitution tracks not yet audited. |
 | **Current decision** | GRC voted to exclude this case from proposal #4 (6 exclude, 2 include, 1 abstain). Calculations are published here for community reference if anyone chooses to bring this forward independently. |
-| **Review focus** | Highest risk: e266 nonce reconstruction methodology (18 participants, 183,605 GONKA); confirm reconstructed weights match on-chain nonce commits in `poc_commits/`. Secondary: e276 partial-epoch cutoff at block 4,267,299. |
+| **Review focus** | Highest risk: e266 nonce reconstruction methodology (18 participants, 183,605 GONKA); confirm reconstructed weights match on-chain nonce commits in `poc_commits/`. |
 
 ---
 
@@ -89,7 +89,7 @@ which reduced Kimi's WeightScaleFactor to 0.78. Epoch 277 is the first clean epo
 | 273 | 4,213,098 | 4,228,488 | |
 | 274 | 4,228,489 | 4,243,879 | |
 | 275 | 4,249,774 | 4,259,270 | |
-| 276 | 4,264,130 | 4,267,299 | cap ends at 4,267,299 (v0.2.13 upgrade at 4,267,300) |
+| 276 | 4,264,130 | 4,279,520 | true epoch end; v0.2.13 upgrade at 4,267,300 |
 
 Reward formula: `323,000 × e^(−0.000475 × (epoch − 1))` GONKA.
 
@@ -219,7 +219,7 @@ destroyed the N-1 reference weight used by the cap formula for e267 — when Kim
 operators returned with full accumulated confirmation weight, the mismatch caused the
 worst inversion of the entire incident (conf/weight ratio 1.75×).
 
-`compensation = max(0, confirmation_weight / total_confirmation_weight × epoch_reward − actual_rewards)`
+`compensation = max(0, confirmation_weight / EpochGroupData.total_weight × epoch_reward − actual_rewards)`
 
 | Metric | Value |
 |--------|-------|
@@ -473,4 +473,4 @@ inferenced query inference poc-delegation <address> \
 | 273 | 4,213,098 | 4,228,488 |
 | 274 | 4,228,489 | 4,243,879 |
 | 275 | 4,249,774 | 4,259,270 |
-| 276 | 4,264,130 | 4,267,299 |
+| 276 | 4,264,130 | 4,279,520 |

@@ -102,8 +102,8 @@ confirmed PoC work, is computed independently by CPoC, and is not subject to the
 2. It is already stored on-chain in `EpochGroupData.ValidationWeights.ConfirmationWeight`.
 3. The chain itself uses it as the reward numerator — the only distortion is that it
    then rescales it back through the capped `weight`, artificially bounding the result.
-4. Using `confirmation_weight / total_confirmation_weight` is equivalent to what the
-   reward formula would produce if the cap were removed.
+4. Using `confirmation_weight / EpochGroupData.total_weight` matches the actual chain
+   settlement denominator, producing the correct counterfactual reward.
 
 ---
 
